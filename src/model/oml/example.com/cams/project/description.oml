@@ -1,0 +1,580 @@
+@dc:title "CAMS Description"
+@dc:description "Collaborative autonomy scenario."
+description <https://example.com/cams/project/description#> as cams-desc {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <http://www.w3.org/2001/XMLSchema#> as xsd
+    uses <https://example.com/cams/vocabulary#> as cams
+
+    instance Commander1 : cams:MissionCommander [
+        cams:name "MyManTheCommander1"
+        cams:expresses IntentFindFix
+        cams:expresses IntentNeutralize
+    ]
+
+    instance IntentFindFix : cams:Intent [
+        cams:name "Find and fix hostile emitters"
+        cams:priority "Medium"
+        cams:isGatedBy IntentFindFixConstraint
+        cams:spawns ObjSearch
+        cams:spawns ObjBDA
+    ]
+
+    instance IntentFindFixConstraint : cams:Constraint [
+        cams:name "Spawn when recon team is assigned"
+        cams:satisfactionStatus "Satisfied"
+        cams:comprisesCondition CondTeamAssigned
+    ]
+
+    instance CondTeamAssigned : cams:Condition [
+        cams:name "Mission assigned to a capable team"
+        cams:satisfactionStatus "Satisfied"
+        cams:isEvaluatedAgainst TeamAlpha
+        cams:isEvaluatedAgainst MissionDeny1
+    ]
+
+    instance IntentNeutralize : cams:Intent [
+        cams:name "Neutralize nearby high-value threat"
+        cams:priority "High"
+        cams:isGatedBy IntentNeutralizeConstraint
+        cams:spawns ObjStrike
+    ]
+
+    instance IntentNeutralizeConstraint : cams:Constraint [
+        cams:name "Spawn strike objective when threat is near"
+        cams:satisfactionStatus "Satisfied"
+        cams:comprisesCondition CondThreatPresent
+        cams:comprisesCondition CondThreatNear
+    ]
+
+    instance CondThreatPresent : cams:Condition [
+        cams:name "Threat of class emitter present in SA"
+        cams:satisfactionStatus "Satisfied"
+        cams:isEvaluatedAgainst TeamAlphaSA
+        cams:isEvaluatedAgainst ThreatEmitter42
+    ]
+
+    instance CondThreatNear : cams:Condition [
+        cams:name "Threat within engagement range"
+        cams:satisfactionStatus "Satisfied"
+        cams:isEvaluatedAgainst ThreatEmitter42
+        cams:isEvaluatedAgainst WS_GT
+    ]
+
+    // ----- Mission plan and objectives -----
+
+    instance MissionDeny1 : cams:MissionPlan [
+        cams:name "ISR/Strike Mission Deny-1"
+        cams:includesIntent IntentFindFix
+        cams:includesIntent IntentNeutralize
+        cams:includesObjective ObjInactiveLoiter
+        cams:assignedTo TeamAlpha
+        cams:recordsGroundTruth WS_GT
+    ]
+
+    instance ObjSearch : cams:Objective [
+        cams:name "Search and detect emitters"
+        cams:successProbabilityThreshold "0.75"^^xsd:decimal
+        cams:isGatedBy ObjSearchConstraint
+        cams:precedes ObjStrike
+    ]
+
+    instance ObjSearchConstraint : cams:Constraint [
+        cams:name "Search remains warranted"
+        cams:satisfactionStatus "Satisfied"
+        cams:comprisesCondition CondSearchWeatherOk
+    ]
+
+    instance CondSearchWeatherOk : cams:Condition [
+        cams:name "Weather permits EO/IR search"
+        cams:satisfactionStatus "Satisfied"
+        cams:isEvaluatedAgainst WeatherClear
+        cams:isEvaluatedAgainst MissionDeny1
+    ]
+
+    instance ObjStrike : cams:Objective [
+        cams:name "Neutralize emitter Threat-42"
+        cams:successProbabilityThreshold "0.70"^^xsd:decimal
+        cams:isGatedBy ObjStrikeConstraint
+        cams:precedes ObjBDA
+    ]
+
+    instance ObjStrikeConstraint : cams:Constraint [
+        cams:name "Strike objective activation"
+        cams:satisfactionStatus "Satisfied"
+        cams:comprisesCondition CondThreatStillValid
+    ]
+
+    instance CondThreatStillValid : cams:Condition [
+        cams:name "Threat still present and in range"
+        cams:satisfactionStatus "Satisfied"
+        cams:isEvaluatedAgainst ThreatEmitter42
+        cams:isEvaluatedAgainst EngagementAlpha
+    ]
+
+    instance ObjBDA : cams:Objective [
+        cams:name "Battle damage assessment"
+        cams:successProbabilityThreshold "0.65"^^xsd:decimal
+        cams:isGatedBy ObjBDAConstraint
+    ]
+
+    instance ObjBDAConstraint : cams:Constraint [
+        cams:name "BDA activation"
+        cams:satisfactionStatus "Satisfied"
+        cams:comprisesCondition CondStrikeCompleted
+    ]
+
+    instance CondStrikeCompleted : cams:Condition [
+        cams:name "Strike OPM completed or engagement executing"
+        cams:satisfactionStatus "Satisfied"
+        cams:isEvaluatedAgainst EngagementAlpha
+    ]
+
+    instance ObjInactiveLoiter : cams:Objective [
+        cams:name "Hold loiter (inactive -- weather constraint failed)"
+        cams:successProbabilityThreshold "0.50"^^xsd:decimal
+        cams:isGatedBy ObjLoiterConstraint
+    ]
+
+    instance ObjLoiterConstraint : cams:Constraint [
+        cams:name "Loiter only in clear weather and safe zone"
+        cams:comprisesCondition CondLoiterWeather
+        cams:comprisesCondition CondLoiterSafe
+    ]
+
+    instance CondLoiterWeather : cams:Condition [
+        cams:name "Ceiling above loiter minimum"
+        cams:satisfactionStatus "Unsatisfied"
+        cams:isEvaluatedAgainst WeatherClear
+    ]
+
+    instance CondLoiterSafe : cams:Condition [
+        cams:name "No active SAM hazard in loiter box"
+        cams:satisfactionStatus "Satisfied"
+        cams:isEvaluatedAgainst HazardSAM
+    ]
+
+    // ----- Teams, assets, capabilities, resources -----
+
+    instance TeamAlpha : cams:Team [
+        cams:name "Team Alpha"
+        cams:includesMember RQ23_Recon
+        cams:includesMember RQ23_Strike
+        cams:includesMember Altius_Jam
+        cams:maintainsSA TeamAlphaSA
+    ]
+
+    instance TeamBravo : cams:Team [
+        cams:name "Team Bravo (recon-only alternate)"
+        cams:includesMember BravoRecon
+        cams:maintainsSA TeamBravoSA
+    ]
+
+    instance CapSearch : cams:Capability [ cams:name "Wide-area search" ]
+    instance CapStrike : cams:Capability [ cams:name "Precision strike" ]
+    instance CapBDA : cams:Capability [ cams:name "Battle damage assessment sensing" ]
+    instance CapJam : cams:Capability [ cams:name "RF jamming" ]
+
+    instance RQ23_Recon : cams:Asset [
+        cams:name "RQ-23 Recon-1"
+        cams:assetKind "Recon"
+        cams:providesCapability CapSearch
+        cams:providesCapability CapBDA
+        cams:ownsResource SensorEOIR
+        cams:ownsResource ComputeRecon
+        cams:isExecuting OPM_Search
+    ]
+
+    instance RQ23_Strike : cams:Asset [
+        cams:name "RQ-23 Strike-1"
+        cams:assetKind "Strike"
+        cams:providesCapability CapStrike
+        cams:ownsResource ComputeStrike
+        cams:ownsResource CommStrike
+    ]
+
+    instance Altius_Jam : cams:Asset [
+        cams:name "Altius Jammer-1"
+        cams:assetKind "Jamming"
+        cams:providesCapability CapJam
+        cams:ownsResource CommJam
+    ]
+
+    instance BravoRecon : cams:Asset [
+        cams:name "Bravo Recon-Only"
+        cams:assetKind "Recon"
+        cams:providesCapability CapSearch
+        cams:ownsResource SensorBravo
+    ]
+
+    instance SensorEOIR : cams:SensorResource [
+        cams:name "Shared EO/IR pod"
+        cams:horizontalPixelCount "3840"^^xsd:integer // NBPM: these aren't real values, I just made them up to look plausible
+        cams:horizontalFOVDegrees "20.0"^^xsd:decimal
+    ]
+
+    instance ComputeRecon : cams:ComputeResource [
+        cams:name "Recon onboard compute"
+        cams:peakTeraflops "2.0"^^xsd:decimal
+    ]
+
+    instance ComputeStrike : cams:ComputeResource [
+        cams:name "Strike onboard compute"
+        cams:peakTeraflops "4.0"^^xsd:decimal
+    ]
+
+    instance CommStrike : cams:CommResource [
+        cams:name "Strike radio"
+    ]
+
+    instance CommJam : cams:CommResource [
+        cams:name "Altius RF jammer"
+        cams:maxTransmitPowerWatts "100.0"^^xsd:decimal
+        cams:jammingBandwidthHz "2.0e7"^^xsd:decimal
+        cams:minOperatingFrequencyHz "2.0e9"^^xsd:decimal
+        cams:maxOperatingFrequencyHz "6.0e9"^^xsd:decimal
+    ]
+
+    instance SensorBravo : cams:SensorResource [
+        cams:name "Bravo EO sensor"
+        cams:horizontalPixelCount "1920"^^xsd:integer
+        cams:horizontalFOVDegrees "40.0"^^xsd:decimal
+    ]
+
+    // ----- Behaviors -----
+
+    instance BehSearch : cams:Behavior [
+        cams:name "CoordinatedSearch"
+        cams:requiresCapability CapSearch
+        cams:requiresResource SensorEOIR
+    ]
+
+    instance BehBravoSearch : cams:Behavior [
+        cams:name "BravoLocalSearch"
+        cams:requiresCapability CapSearch
+        cams:requiresResource SensorBravo
+    ]
+
+    instance BehStrike : cams:Behavior [
+        cams:name "FormationStrike"
+        cams:requiresCapability CapStrike
+        cams:requiresResource ComputeStrike
+        cams:requiresResource SensorEOIR
+    ]
+
+    instance BehBDA : cams:Behavior [
+        cams:name "BattleDamageAssessment"
+        cams:requiresCapability CapBDA
+    ]
+
+    // Need ~0.5 m GSD at planned standoff to classify damage; GSD ~= R*tan(FOV/pixels).
+    relation instance BDA_Needs_EOIR : cams:ResourceRequirement [
+        from BehBDA
+        to SensorEOIR
+        cams:expectedStandoffMeters "4000"^^xsd:decimal // NBPM: it's a bummer to me that I can't figure out how to "generate" this from reasoning or some other language, so I hard-code
+        cams:maxGroundSampleDistanceMeters "0.5"^^xsd:decimal
+    ]
+
+    instance BehJam : cams:Behavior [
+        cams:name "SupportJamming"
+        cams:requiresCapability CapJam
+    ]
+
+    // Power/standoff on the requirement; emitter frequency/bandwidth come from countersThreat.
+    relation instance Jam_Needs_Comm : cams:ResourceRequirement [
+        from BehJam
+        to CommJam
+        cams:expectedStandoffMeters "8000"^^xsd:decimal
+        cams:minTransmitPowerWatts "50.0"^^xsd:decimal
+        cams:countersThreat ThreatEmitter42
+    ]
+
+    instance BehLoiter : cams:Behavior [
+        cams:name "LoiterAtPoint"
+        cams:requiresCapability CapSearch
+    ]
+
+    // ----- World state / SA -----
+
+    instance WS_GT : cams:WorldState [
+        cams:name "Ground-truth COP"
+        cams:includesFacet AssetStateRecon
+        cams:includesFacet AssetStateStrike
+        cams:includesFacet ThreatEmitter42
+        cams:includesFacet HazardSAM
+        cams:includesFacet WeatherClear
+    ]
+
+    instance WS_BeliefAlpha : cams:WorldState [
+        cams:name "Team Alpha believed COP"
+        cams:includesFacet ThreatEmitter42
+        cams:includesFacet WeatherClear
+        cams:includesFacet AssetStateRecon
+    ]
+
+    instance AssetStateRecon : cams:AssetState [
+        cams:name "Recon-1"
+        cams:describesAsset RQ23_Recon
+        cams:readinessStatus "Ready"
+    ]
+
+    instance AssetStateStrike : cams:AssetState [
+        cams:name "Strike-1"
+        cams:describesAsset RQ23_Strike
+        cams:readinessStatus "Ready"
+    ]
+
+    instance ThreatEmitter42 : cams:Threat [
+        cams:name "Emitter-42"
+        cams:centerFrequencyHz "3.2e9"^^xsd:decimal
+        cams:emissionBandwidthHz "5.0e6"^^xsd:decimal
+    ]
+
+    instance HazardSAM : cams:Hazard [
+        cams:name "SAM envelope north"
+        cams:keepOutRadiusMeters "15000"^^xsd:decimal
+    ]
+
+    instance WeatherClear : cams:WeatherCondition [
+        cams:name "Clear with intermittent ceiling"
+        cams:ceilingMeters "1200"^^xsd:decimal
+    ]
+
+    instance TeamAlphaSA : cams:SituationalAwareness [
+        cams:name "Team Alpha SA"
+        cams:believes WS_BeliefAlpha
+    ]
+
+    instance TeamBravoSA : cams:SituationalAwareness [
+        cams:name "Team Bravo SA"
+        cams:believes WS_BeliefAlpha
+    ]
+
+    // ----- Predicted world states -----
+
+    instance WS0 : cams:PredictedWorldState [
+        cams:name "Predicted state before OPM1"
+        cams:includesFacet ThreatEmitter42
+        cams:includesFacet WeatherClear
+        cams:includesFacet AssetStateRecon
+    ]
+
+    instance WS1 : cams:PredictedWorldState [
+        cams:name "Predicted state after search"
+        cams:includesFacet ThreatEmitter42
+        cams:includesFacet WeatherClear
+        cams:includesFacet AssetStateRecon
+    ]
+
+    instance WS2 : cams:PredictedWorldState [
+        cams:name "Predicted state after strike"
+        cams:includesFacet ThreatEmitter42
+        cams:includesFacet AssetStateStrike
+        cams:includesFacet WeatherClear
+    ]
+
+    instance WS3 : cams:PredictedWorldState [
+        cams:name "Predicted state after BDA"
+        cams:includesFacet ThreatEmitter42
+        cams:includesFacet WeatherClear
+    ]
+
+    instance DeltaSearchReveals : cams:WorldStateDelta [
+        cams:name "Search confirms emitter track"
+        cams:affectsFacet ThreatEmitter42
+    ]
+
+    instance DeltaStrikeAttrits : cams:WorldStateDelta [
+        cams:name "Strike updates threat status"
+        cams:affectsFacet ThreatEmitter42
+        cams:affectsFacet AssetStateStrike
+    ]
+
+    instance DeltaBDAAssesses : cams:WorldStateDelta [
+        cams:name "BDA refines threat assessment"
+        cams:affectsFacet ThreatEmitter42
+    ]
+
+    // ----- Engagement Alpha -----
+
+    instance EngagementAlpha : cams:EngagementPlan [
+        cams:name "Alpha engagement for Mission Deny-1"
+        cams:realizes MissionDeny1
+        cams:isExecutedBy TeamAlpha
+        cams:contains OPM_Search
+        cams:contains OPM_JamAndStrike
+        cams:contains OPM_BDA
+    ]
+
+    instance OPM_Search : cams:OPM [
+        cams:name "OPM Search"
+        cams:contains RoleSearch
+        cams:satisfies ObjSearch
+        cams:usesEstimator EstSearch
+        cams:startsFrom WS0
+        cams:predictsSuccessor WS1
+        cams:appliesDelta DeltaSearchReveals
+        cams:precedes OPM_JamAndStrike
+    ]
+
+    instance RoleSearch : cams:Role [
+        cams:name "Search spotter"
+        cams:realizesBehavior BehSearch
+        cams:allocatedTo RQ23_Recon
+    ]
+
+    instance OPM_JamAndStrike : cams:OPM [
+        cams:name "OPM Jam-and-Strike"
+        cams:contains RoleStrike
+        cams:contains RoleJam
+        cams:satisfies ObjStrike
+        cams:usesEstimator EstStrike
+        cams:usesEstimator EstJam
+        cams:predictsSuccessor WS2
+        cams:appliesDelta DeltaStrikeAttrits
+        cams:precedes OPM_BDA
+    ]
+
+    instance RoleStrike : cams:Role [
+        cams:name "Strike lead"
+        cams:realizesBehavior BehStrike
+        cams:allocatedTo RQ23_Strike
+    ]
+
+    instance RoleJam : cams:Role [
+        cams:name "Jam escort"
+        cams:realizesBehavior BehJam
+        cams:allocatedTo Altius_Jam
+    ]
+
+    instance OPM_BDA : cams:OPM [
+        cams:name "OPM BDA"
+        cams:contains RoleBDA
+        cams:satisfies ObjBDA
+        cams:usesEstimator EstBDA
+        cams:predictsSuccessor WS3
+        cams:appliesDelta DeltaBDAAssesses
+    ]
+
+    instance RoleBDA : cams:Role [
+        cams:name "BDA assessor"
+        cams:realizesBehavior BehBDA
+        cams:allocatedTo RQ23_Recon
+    ]
+
+    // Note: OPM_JamAndStrike input WS1 is derived by StateChain from OPM_Search.predictsSuccessor
+    // OPM_BDA input WS2 derived from OPM_JamAndStrike.predictsSuccessor
+
+    instance EstSearch : cams:SuccessProbabilityEstimator [
+        cams:name "Search PoS estimator"
+        cams:yields EstSearchResult
+    ]
+
+    instance EstStrike : cams:SuccessProbabilityEstimator [
+        cams:name "Strike PoS estimator"
+        cams:yields EstStrikeResult
+    ]
+
+    instance EstBDA : cams:SuccessProbabilityEstimator [
+        cams:name "BDA PoS estimator"
+        cams:yields EstBDAResult
+    ]
+
+    instance EstJam : cams:SuccessProbabilityEstimator [
+        cams:name "Jam PoS estimator"
+        cams:yields EstJamResult
+    ]
+
+    instance EstSearchResult : cams:OPMSuccessEstimate [
+        cams:name "Search estimate"
+        cams:estimatedSuccessProbability "0.90"^^xsd:decimal
+    ]
+
+    instance EstStrikeResult : cams:OPMSuccessEstimate [
+        cams:name "Strike estimate"
+        cams:estimatedSuccessProbability "0.80"^^xsd:decimal
+    ]
+
+    instance EstBDAResult : cams:OPMSuccessEstimate [
+        cams:name "BDA estimate"
+        cams:estimatedSuccessProbability "0.85"^^xsd:decimal
+    ]
+
+    instance EstJamResult : cams:OPMSuccessEstimate [
+        cams:name "Jam estimate"
+        cams:estimatedSuccessProbability "0.95"^^xsd:decimal
+    ]
+
+    // ----- Engagement Bravo -----
+
+    instance EngagementBravo : cams:EngagementPlan [
+        cams:name "Bravo alternate engagement"
+        cams:realizes MissionDeny1
+        cams:isExecutedBy TeamBravo
+        cams:contains OPM_BravoSearch
+    ]
+
+    instance OPM_BravoSearch : cams:OPM [
+        cams:name "Bravo Search OPM"
+        cams:contains RoleBravoSearch
+        cams:satisfies ObjSearch
+        cams:usesEstimator EstBravoSearch
+        cams:startsFrom WS0
+        cams:predictsSuccessor WS1
+    ]
+
+    instance RoleBravoSearch : cams:Role [
+        cams:name "Bravo search spotter"
+        cams:realizesBehavior BehBravoSearch
+        cams:allocatedTo BravoRecon
+    ]
+
+    instance EstBravoSearch : cams:SuccessProbabilityEstimator [
+        cams:name "Bravo search estimator"
+        cams:yields EstBravoSearchResult
+    ]
+
+    instance EstBravoSearchResult : cams:OPMSuccessEstimate [
+        cams:name "Bravo search estimate"
+        cams:estimatedSuccessProbability "0.70"^^xsd:decimal
+    ]
+
+    // ----- Assessments -----
+
+    instance AssessmentAlphaFeasible : cams:MissionAssessment [
+        cams:name "Alpha PoS monitor -- thresholds met"
+        cams:composedSuccessProbability "0.757"^^xsd:decimal
+        cams:monitors MissionDeny1
+        cams:assesses EngagementAlpha
+        cams:triggers ReplanAfterSpawn
+    ]
+
+    instance ReplanAfterSpawn : cams:ReplanAction [
+        cams:name "Replan after IntentNeutralize spawned ObjStrike"
+        cams:replans EngagementAlpha
+    ]
+
+    instance AssessmentInfeasible : cams:MissionAssessment [
+        cams:name "PoS monitor -- Bravo cannot meet strike threshold"
+        cams:composedSuccessProbability "0.70"^^xsd:decimal
+        cams:monitors MissionDeny1
+        cams:assesses EngagementBravo
+        cams:triggers NoticeMissionImpossible
+    ]
+
+    instance NoticeMissionImpossible : cams:CommanderNotice [
+        cams:name "Mission Deny-1 impossible for Team Bravo alone"
+    ]
+
+    instance ReplanAfterDeactivate : cams:ReplanAction [
+        cams:name "Replan after ObjInactiveLoiter deactivated"
+        cams:replans EngagementAlpha
+    ]
+
+    instance AssessmentDeactivate : cams:MissionAssessment [
+        cams:name "Assessment after loiter objective went inactive"
+        cams:composedSuccessProbability "0.757"^^xsd:decimal
+        cams:monitors MissionDeny1
+        cams:assesses EngagementAlpha
+        cams:triggers ReplanAfterDeactivate
+    ]
+}

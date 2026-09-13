@@ -1,0 +1,25 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Q1: Active Intent + assigned-team engagement OPMs for active objectives (via Roles), with chronological sequence.
+SELECT ?intent ?objective ?opm ?role ?asset ?team ?nextObjective ?nextOpm
+       (COUNT(DISTINCT ?predOpm) AS ?seq)
+WHERE {
+  ?intent a cams:Intent ;
+          cams:activationStatus "Active" ;
+          cams:spawns ?objective .
+  ?objective cams:activationStatus "Active" .
+  ?mission cams:includesIntent ?intent ;
+           cams:includesObjective ?objective ;
+           cams:assignedTo ?team .
+  ?ep cams:realizes ?mission ;
+      cams:isExecutedBy ?team ;
+      cams:contains ?opm .
+  ?opm cams:satisfies ?objective ;
+       cams:contains ?role .
+  ?role cams:allocatedTo ?asset .
+  OPTIONAL { ?objective cams:precedes ?nextObjective }
+  OPTIONAL { ?opm cams:precedes ?nextOpm }
+  OPTIONAL { ?predOpm cams:precedes+ ?opm }
+}
+GROUP BY ?intent ?objective ?opm ?role ?asset ?team ?nextObjective ?nextOpm
+ORDER BY ?seq ?intent ?role

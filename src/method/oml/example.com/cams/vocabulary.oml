@@ -1,0 +1,854 @@
+@dc:title "CAMS Vocabulary"
+@dc:description "Collaborative Autonomy Management System vocabulary."
+vocabulary <https://example.com/cams/vocabulary#> as cams {
+    extends <http://purl.org/dc/elements/1.1/> as dc
+    extends <http://www.w3.org/2001/XMLSchema#> as xsd
+
+
+    @dc:description "Intent/objective priority."
+    scalar Priority [
+        oneOf "Low", "Medium", "High"
+    ] = xsd:string
+
+    @dc:description "Active or Inactive for Intents and Objectives."
+    scalar ActivationStatus [
+        oneOf "Active", "Inactive"
+    ] = xsd:string
+
+    @dc:description "Satisfied or Unsatisfied for Constraints and Conditions."
+    scalar SatisfactionStatus [
+        oneOf "Satisfied", "Unsatisfied"
+    ] = xsd:string
+
+    @dc:description "Plan/runtime execution lifecycle state."
+    scalar ExecutionStatus [
+        oneOf "Planned", "Executing", "Completed", "Aborted"
+    ] = xsd:string
+
+    @dc:description "Asset operational readiness."
+    scalar ReadinessStatus [
+        oneOf "Ready", "Degraded", "Unavailable"
+    ] = xsd:string
+
+    @dc:description "Primary mission role of an Asset."
+    scalar AssetKind [
+        oneOf "Recon", "Strike", "Jamming", "MultiRole"
+    ] = xsd:string
+
+    @dc:description "Whether a Resource is free or in use."
+    scalar AvailabilityStatus [
+        oneOf "Available", "Busy"
+    ] = xsd:string
+
+
+    @dc:description "Anything with a human-readable name."
+    aspect Identified
+
+    @dc:description "Element that may contain other identified elements."
+    aspect Container < Identified
+
+    @dc:description "Element that may be contained by a Container."
+    aspect Contained < Identified
+
+    @dc:description "Intent or Objective gated by a Constraint."
+    aspect Constrained < Identified
+
+    @dc:description "Data context against which a Condition may be evaluated."
+    aspect EvaluationContext < Identified
+
+    @dc:description "Element with a plan/runtime execution status."
+    aspect Executable < Identified
+
+
+    @dc:description "Human authority for collaborative autonomy."
+    concept MissionCommander < Identified
+
+    @dc:description "Commander intent (DARPA CODE's Intended Objective Type (IOT))."
+    concept Intent < Constrained [
+        restricts isGatedBy to exactly 1
+    ]
+
+    @dc:description "Conjunction gate over a set of Conditions."
+    concept Constraint < Identified
+
+    @dc:description "Atomic predicate evaluated against available data."
+    concept Condition < Identified
+
+
+    @dc:description "Measurable mission outcome."
+    concept Objective < Constrained [
+        restricts isGatedBy to exactly 1
+    ]
+
+    @dc:description "Encodes what a mission aims to achieve."
+    concept MissionPlan < Container, EvaluationContext, Executable
+
+    @dc:description "How a MissionPlan is realized/satisfied."
+    concept EngagementPlan < Container, Contained, EvaluationContext, Executable
+
+    @dc:description "Reusable, atomic autonomous behavior type (roughly analogous to DARPA CODE's unhelpfully named Play)."
+    concept Behavior < Identified
+
+    @dc:description "Ordered objective plan module that realizes an Objective."
+    concept OPM < Container, Contained, Executable
+
+    @dc:description "Fillable slot inside an OPM's execution specification: a behavior bound to an Asset."
+    concept Role < Contained [
+        restricts realizesBehavior to exactly 1
+        restricts allocatedTo to exactly 1
+    ]
+
+
+    @dc:description "Physical (or virtual I suppose) platform (UAV, etc.)."
+    concept Asset < EvaluationContext
+
+    @dc:description "Assets that know about each other and can collaborate."
+    concept Team < EvaluationContext
+
+    @dc:description "Ability an asset provides or a behavior requires."
+    concept Capability < Identified
+
+    @dc:description "Potentially contested platform resource."
+    concept Resource < Identified
+
+    @dc:description "Imaging sensor platform resource (pixels / FOV)."
+    concept SensorResource < Resource
+
+    @dc:description "Onboard compute resource (peak TFLOPS)."
+    concept ComputeResource < Resource
+
+    @dc:description "Communications or RF jammer resource (power / band)."
+    concept CommResource < Resource
+
+
+    @dc:description "Snapshot of the operational world (ground truth or predicted)."
+    concept WorldState < EvaluationContext
+
+    @dc:description "World state predicted after applying predicted world state iterations due to OPMs."
+    concept PredictedWorldState < WorldState
+
+    @dc:description "Component fact within a WorldState."
+    concept WorldStateFacet < EvaluationContext
+
+    @dc:description "World-state facet describing one Asset's reported condition."
+    concept AssetState < WorldStateFacet
+
+    @dc:description "Hostile or relevant emitter / adversary object in the COP."
+    concept Threat < WorldStateFacet
+
+    @dc:description "Geographic or envelope hazard with some keep-out zone."
+    concept Hazard < WorldStateFacet
+
+    @dc:description "Atmospheric / ceiling conditions affecting sensors and flight."
+    concept WeatherCondition < WorldStateFacet
+
+    @dc:description "How an Asset or Team currently understands the world (may not align with actual or true world state)."
+    concept SituationalAwareness < EvaluationContext
+
+    @dc:description "Expected change in world-state due to running an OPM."
+    concept WorldStateDelta < Identified
+
+
+    @dc:description "Estimates OPM success probability given plan and world context."
+    concept SuccessProbabilityEstimator < Identified
+
+    @dc:description "Asserted success probability for one OPM at an assessment."
+    concept OPMSuccessEstimate < Identified
+
+    @dc:description "Mission-level monitoring of composed PoS and responses."
+    concept MissionAssessment < Identified
+
+    @dc:description "Response to PoS thresholds or plan changes."
+    concept AssessmentResponse < Identified
+
+    @dc:description "Automated replan against an engagement."
+    concept ReplanAction < AssessmentResponse
+
+    @dc:description "Kick-back notice to mission commander."
+    concept CommanderNotice < AssessmentResponse
+
+
+    @dc:description "Human-readable label."
+    scalar property name [
+        domain Identified
+        range xsd:string
+        functional
+    ]
+
+    @dc:description "Assert on Intent; Objectives inherit via ObjectiveInheritsPriority when spawned."
+    scalar property priority [
+        domain Constrained
+        range Priority
+        functional
+    ]
+
+    @dc:description "Active when gating Constraint is Satisfied (Intents and Objectives)."
+    scalar property activationStatus [
+        domain Constrained
+        range ActivationStatus
+        functional
+    ]
+
+    @dc:description "Satisfied/Unsatisfied status for Constraints and Conditions."
+    scalar property satisfactionStatus [
+        domain Identified
+        range SatisfactionStatus
+        functional
+    ]
+
+    @dc:description "Runtime status. Assert nothing for Executing: Asset isExecuting entails OPM Executing, which rolls up to EngagementPlan and MissionPlan. Planned/Completed/Aborted are asserted when needed."
+    scalar property executionStatus [
+        domain Executable
+        range ExecutionStatus
+        functional
+    ]
+
+    @dc:description "Primary role class of an Asset."
+    scalar property assetKind [
+        domain Asset
+        range AssetKind
+        functional
+    ]
+
+    @dc:description "Busy when an executing OPM's behavior requires this resource (i.e., ResourceOccupied*)."
+    scalar property availabilityStatus [
+        domain Resource
+        range AvailabilityStatus
+        functional
+    ]
+
+    @dc:description "Operational readiness of an asset as reported from world-state."
+    scalar property readinessStatus [
+        domain AssetState
+        range ReadinessStatus
+        functional
+    ]
+
+    @dc:description "Horizontal pixel count of an imaging sensor."
+    scalar property horizontalPixelCount [
+        domain SensorResource
+        range xsd:integer
+        functional
+    ]
+
+    @dc:description "Horizontal field of view in degrees."
+    scalar property horizontalFOVDegrees [
+        domain SensorResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Peak compute throughput (TFLOPS) available compute."
+    scalar property peakTeraflops [
+        domain ComputeResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Keep-out radius around a hazard (meters)."
+    scalar property keepOutRadiusMeters [
+        domain Hazard
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Cloud / weather ceiling (meters AGL)."
+    scalar property ceilingMeters [
+        domain WeatherCondition
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Planner-assumed slant range (meters) from asset to observed object for this requirement."
+    scalar property expectedStandoffMeters [
+        domain ResourceRequirement
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Maximum acceptable ground sample distance (meters/pixel) for the behavior to succeed with this sensor."
+    scalar property maxGroundSampleDistanceMeters [
+        domain ResourceRequirement
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Minimum transmit power (Watts) the jammer must provide at the planned standoff."
+    scalar property minTransmitPowerWatts [
+        domain ResourceRequirement
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Emitter center frequency (Hz) (asserted on the Threat)."
+    scalar property centerFrequencyHz [
+        domain Threat
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Emitter occupied bandwidth (Hz)."
+    scalar property emissionBandwidthHz [
+        domain Threat
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Maximum RF transmit power of a comm/jammer resource (W)."
+    scalar property maxTransmitPowerWatts [
+        domain CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Instantaneous bandwidth the jammer can achieve (Hz)."
+    scalar property jammingBandwidthHz [
+        domain CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Lower bound of jammer tunable frequency (Hz)."
+    scalar property minOperatingFrequencyHz [
+        domain CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Upper bound of jammer tunable frequency (Hz)."
+    scalar property maxOperatingFrequencyHz [
+        domain CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Minimum acceptable success probability for an Objective."
+    scalar property successProbabilityThreshold [
+        domain Objective
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Estimated success probability for one OPM."
+    scalar property estimatedSuccessProbability [
+        domain OPMSuccessEstimate
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Mission-level composed success probability on an assessment."
+    scalar property composedSuccessProbability [
+        domain MissionAssessment
+        range xsd:decimal
+        functional
+    ]
+
+
+    @dc:description "MissionCommander expresses Intent."
+    relation expresses [
+        from MissionCommander
+        to Intent
+        reverse isExpressedBy
+    ]
+
+    @dc:description "MissionPlan includes an Intent."
+    relation includesIntent [
+        from MissionPlan
+        to Intent
+        reverse isIntentOf
+    ]
+
+    @dc:description "MissionPlan includes an Objective."
+    relation includesObjective [
+        from MissionPlan
+        to Objective
+        reverse isObjectiveOf
+    ]
+
+    @dc:description "Intent or Objective is gated by a Constraint."
+    relation isGatedBy [
+        from Constrained
+        to Constraint
+        reverse gates
+        functional
+    ]
+
+    @dc:description "Constraint comprises a Condition in its conjunction."
+    relation comprisesCondition [
+        from Constraint
+        to Condition
+        reverse isConditionOf
+    ]
+
+    @dc:description "Condition is evaluated against available CAMS data."
+    relation isEvaluatedAgainst [
+        from Condition
+        to EvaluationContext
+        reverse informsCondition
+    ]
+
+    @dc:description "Intent generates an Objective when its Constraint is satisfied."
+    relation spawns [
+        from Intent
+        to Objective
+        reverse isSpawnedBy
+        inverse functional
+    ]
+
+
+    @dc:description "MissionPlan is assigned to a Team."
+    relation assignedTo [
+        from MissionPlan
+        to Team
+        reverse serves
+        functional
+    ]
+
+    @dc:description "EngagementPlan realizes a MissionPlan for a team."
+    relation realizes [
+        from EngagementPlan
+        to MissionPlan
+        reverse isRealizedBy
+        functional
+    ]
+
+    @dc:description "EngagementPlan is executed by a Team."
+    relation isExecutedBy [
+        from EngagementPlan
+        to Team
+        reverse executes
+        functional
+    ]
+
+    @dc:description "Container contains a Contained element."
+    relation contains [
+        from Container
+        to Contained
+        reverse isContainedBy
+    ]
+
+    @dc:description "OPM satisfies an Objective."
+    relation satisfies [
+        from OPM
+        to Objective
+        reverse isSatisfiedBy
+    ]
+
+    @dc:description "Role realizes a Behavior type."
+    relation realizesBehavior [
+        from Role
+        to Behavior
+        reverse isUsedByOPM
+        functional
+    ]
+
+    @dc:description "Role is allocated to an Asset (note an OPM may have many Roles!)."
+    relation allocatedTo [
+        from Role
+        to Asset
+        reverse hosts
+        functional
+    ]
+
+    @dc:description "Asset is currently executing an OPM."
+    relation isExecuting [
+        from Asset
+        to OPM
+        reverse isBeingExecutedBy
+        functional
+    ]
+
+    @dc:description "Ordering among OPMs, Intents, or Objectives."
+    relation precedes [
+        from Identified
+        to Identified
+        reverse follows
+        asymmetric
+        irreflexive
+    ]
+
+
+    @dc:description "Team membership of an Asset."
+    relation includesMember [
+        from Team
+        to Asset
+        reverse isMemberOf
+    ]
+
+    @dc:description "Behavior needs a Capability."
+    relation requiresCapability [
+        from Behavior
+        to Capability
+        reverse isCapabilityRequiredBy
+    ]
+
+    @dc:description "Asset provides a Capability."
+    relation providesCapability [
+        from Asset
+        to Capability
+        reverse isProvidedBy
+    ]
+
+    @dc:description "Reified Behavior-to-Resource need."
+    relation entity ResourceRequirement [
+        from Behavior
+        to Resource
+        forward requiresResource
+        reverse isResourceRequiredBy
+    ]
+
+    @dc:description "Jam (or similar) requirement is sized against a specific emitting Threat; frequency/bandwidth from Threat."
+    relation countersThreat [
+        from ResourceRequirement
+        to Threat
+        reverse isCounteredBy
+        functional
+    ]
+
+    @dc:description "Asset owns a Resource."
+    relation ownsResource [
+        from Asset
+        to Resource
+        reverse isResourceOf
+    ]
+
+    @dc:description "Asset uses a Resource owned by another asset (derived by ResourceSharing when an allocated OPM's behavior requires offboard resource)."
+    relation sharesResource [
+        from Asset
+        to Resource
+        reverse isSharedBy
+    ]
+
+    @dc:description "Resource is occupied by an OPM that is currently executing and whose behavior requires it."
+    relation isOccupiedBy [
+        from Resource
+        to OPM
+        reverse occupies
+    ]
+
+
+    @dc:description "WorldState includes a facet fact."
+    relation includesFacet [
+        from WorldState
+        to WorldStateFacet
+        reverse isFacetOf
+    ]
+
+    @dc:description "AssetState describes a particular Asset."
+    relation describesAsset [
+        from AssetState
+        to Asset
+        reverse isDescribedBy
+    ]
+
+    @dc:description "Asset or Team maintains SituationalAwareness."
+    relation maintainsSA [
+        from Identified
+        to SituationalAwareness
+        reverse isAwarenessOf
+    ]
+
+    @dc:description "SA believes a WorldState (common operating picture)."
+    relation believes [
+        from SituationalAwareness
+        to WorldState
+        reverse isBelievedIn
+        functional
+    ]
+
+    @dc:description "MissionPlan records ground-truth WorldState."
+    relation recordsGroundTruth [
+        from MissionPlan
+        to WorldState
+        reverse isGroundTruthOf
+        functional
+    ]
+
+
+    @dc:description "OPM uses one or more success-probability estimators (multi-role OPMs may use several)."
+    relation usesEstimator [
+        from OPM
+        to SuccessProbabilityEstimator
+        reverse estimatesFor
+    ]
+
+    @dc:description "Estimator evaluation context."
+    relation isEvaluatedOver [
+        from SuccessProbabilityEstimator
+        to Identified
+        reverse informsEstimator
+    ]
+
+    @dc:description "Estimator produces an OPMSuccessEstimate."
+    relation yields [
+        from SuccessProbabilityEstimator
+        to OPMSuccessEstimate
+        reverse isYieldedBy
+        inverse functional
+    ]
+
+    @dc:description "OPM starts from a predicted input WorldState."
+    relation startsFrom [
+        from OPM
+        to PredictedWorldState
+        reverse isInputTo
+        functional
+    ]
+
+    @dc:description "OPM predicts a successor WorldState."
+    relation predictsSuccessor [
+        from OPM
+        to PredictedWorldState
+        reverse isPredictedBy
+        functional
+    ]
+
+    @dc:description "OPM applies a WorldStateDelta."
+    relation appliesDelta [
+        from OPM
+        to WorldStateDelta
+        reverse isAppliedBy
+    ]
+
+    @dc:description "WorldStateDelta affects a WorldStateFacet."
+    relation affectsFacet [
+        from WorldStateDelta
+        to WorldStateFacet
+        reverse isAffectedByDelta
+    ]
+
+    @dc:description "Assessment aggregates an OPMSuccessEstimate."
+    relation aggregates [
+        from MissionAssessment
+        to OPMSuccessEstimate
+        reverse isAggregatedBy
+    ]
+
+    @dc:description "MissionAssessment assesses an EngagementPlan (estimates are aggregated by rule)."
+    relation assesses [
+        from MissionAssessment
+        to EngagementPlan
+        reverse isAssessedBy
+        functional
+    ]
+
+    @dc:description "Assessment monitors a MissionPlan."
+    relation monitors [
+        from MissionAssessment
+        to MissionPlan
+        reverse isMonitoredBy
+        functional
+    ]
+
+    @dc:description "Assessment triggers a response (replan or notice)."
+    relation triggers [
+        from MissionAssessment
+        to AssessmentResponse
+        reverse isTriggeredBy
+    ]
+
+    @dc:description "CommanderNotice is addressed to a MissionCommander."
+    relation sentTo [
+        from CommanderNotice
+        to MissionCommander
+        reverse receives
+    ]
+
+    @dc:description "Replan action targets an EngagementPlan to revise."
+    relation replans [
+        from ReplanAction
+        to EngagementPlan
+        reverse isReplannedBy
+        functional
+    ]
+
+    @dc:description "Role is assigned to an Asset that has required capabilities."
+    relation isFeasiblyAssignedTo [
+        from Role
+        to Asset
+        reverse feasiblyHosts
+    ]
+
+    @dc:description "Intent whose activationStatus is Active."
+    concept ActiveIntent = Intent [
+        restricts activationStatus to "Active"
+    ]
+
+    @dc:description "Objective whose activationStatus is Active."
+    concept ActiveObjective = Objective [
+        restricts activationStatus to "Active"
+    ]
+
+    @dc:description "Mission assessment that kicks back to the commander."
+    concept InfeasibleMissionAssessment = MissionAssessment [
+        restricts some triggers to CommanderNotice
+    ]
+
+    @dc:description "Any Unsatisfied Condition makes its Constraint Unsatisfied (conjunction evaluates to false)."
+    rule ConstraintUnsatisfied [
+        comprisesCondition(c, cond) &
+        satisfactionStatus(cond, "Unsatisfied") &
+        Constraint(c) & Condition(cond)
+        -> satisfactionStatus(c, "Unsatisfied")
+    ]
+
+    @dc:description "Objective is Active when gating Constraint Satisfied."
+    rule ObjectiveActive [
+        isGatedBy(obj, c) &
+        satisfactionStatus(c, "Satisfied") &
+        Objective(obj) & Constraint(c)
+        -> activationStatus(obj, "Active")
+    ]
+
+    @dc:description "Objective is Inactive when gating Constraint Unsatisfied."
+    rule ObjectiveInactive [
+        isGatedBy(obj, c) &
+        satisfactionStatus(c, "Unsatisfied") &
+        Objective(obj) & Constraint(c)
+        -> activationStatus(obj, "Inactive")
+    ]
+
+    @dc:description "Intent is Active (armed for spawn/execution) when gating Constraint Satisfied."
+    rule IntentActive [
+        isGatedBy(intent, c) &
+        satisfactionStatus(c, "Satisfied") &
+        Intent(intent) & Constraint(c)
+        -> activationStatus(intent, "Active")
+    ]
+
+    @dc:description "Intent is Inactive when gating Constraint Unsatisfied."
+    rule IntentInactive [
+        isGatedBy(intent, c) &
+        satisfactionStatus(c, "Unsatisfied") &
+        Intent(intent) & Constraint(c)
+        -> activationStatus(intent, "Inactive")
+    ]
+
+    @dc:description "Objective inherits priority from the Intent that creates it."
+    rule ObjectiveInheritsPriority [
+        spawns(intent, obj) &
+        priority(intent, p) &
+        Intent(intent) & Objective(obj)
+        -> priority(obj, p)
+    ]
+
+    @dc:description "Successor world state of an OPM is the input world state of the next OPM."
+    rule StateChain [
+        precedes(opm1, opm2) &
+        predictsSuccessor(opm1, ws) &
+        OPM(opm1) & OPM(opm2) & PredictedWorldState(ws)
+        -> startsFrom(opm2, ws)
+    ]
+
+    @dc:description "MissionPlan encompasses objectives spawned by its commander intents."
+    rule MissionIncludesSpawnedObjective [
+        includesIntent(mp, intent) &
+        spawns(intent, obj) &
+        MissionPlan(mp) & Intent(intent) & Objective(obj)
+        -> includesObjective(mp, obj)
+    ]
+
+    @dc:description "EngagementPlan realizing a MissionPlan is contained by that MissionPlan."
+    rule MissionContainsRealizingEngagement [
+        realizes(ep, mp) &
+        EngagementPlan(ep) & MissionPlan(mp)
+        -> contains(mp, ep)
+    ]
+
+    @dc:description "OPM is Executing when an asset filling one of its Roles asserts isExecuting that OPM."
+    rule OPMExecuting [
+        isExecuting(asset, opm) &
+        contains(opm, role) &
+        allocatedTo(role, asset) &
+        Asset(asset) & OPM(opm) & Role(role)
+        -> executionStatus(opm, "Executing")
+    ]
+
+    @dc:description "EngagementPlan is Executing when any contained OPM is Executing."
+    rule EngagementExecuting [
+        contains(ep, opm) &
+        executionStatus(opm, "Executing") &
+        EngagementPlan(ep) & OPM(opm)
+        -> executionStatus(ep, "Executing")
+    ]
+
+    @dc:description "MissionPlan is Executing when a contained EngagementPlan of the assigned team is Executing."
+    rule MissionExecuting [
+        contains(mp, ep) &
+        assignedTo(mp, team) &
+        isExecutedBy(ep, team) &
+        executionStatus(ep, "Executing") &
+        MissionPlan(mp) & EngagementPlan(ep) & Team(team)
+        -> executionStatus(mp, "Executing")
+    ]
+
+    @dc:description "Same-team only: Role allocated to consumer requiring a resource owned by a different team member entails sharesResource."
+    rule ResourceSharing [
+        contains(opm, role) &
+        allocatedTo(role, consumer) &
+        realizesBehavior(role, b) &
+        requiresResource(b, r) &
+        ownsResource(owner, r) &
+        differentFrom(consumer, owner) &
+        includesMember(team, consumer) &
+        includesMember(team, owner) &
+        OPM(opm) & Role(role) & Behavior(b) & Resource(r) & Asset(consumer) & Asset(owner) & Team(team)
+        -> sharesResource(consumer, r)
+    ]
+
+    @dc:description "Owned resource is Busy/occupied when the owning asset isExecuting an OPM and fills a Role whose behavior requires it."
+    rule ResourceOccupiedOwned [
+        isExecuting(asset, opm) &
+        contains(opm, role) &
+        allocatedTo(role, asset) &
+        realizesBehavior(role, b) &
+        requiresResource(b, r) &
+        ownsResource(asset, r) &
+        Asset(asset) & OPM(opm) & Role(role) & Behavior(b) & Resource(r)
+        -> isOccupiedBy(r, opm) & availabilityStatus(r, "Busy")
+    ]
+
+    @dc:description "Shared resource is Busy/occupied when a sharing asset isExecuting an OPM and fills a Role whose behavior requires it."
+    rule ResourceOccupiedShared [
+        isExecuting(asset, opm) &
+        contains(opm, role) &
+        allocatedTo(role, asset) &
+        realizesBehavior(role, b) &
+        requiresResource(b, r) &
+        sharesResource(asset, r) &
+        Asset(asset) & OPM(opm) & Role(role) & Behavior(b) & Resource(r)
+        -> isOccupiedBy(r, opm) & availabilityStatus(r, "Busy")
+    ]
+
+    @dc:description "Derive feasible Role allocation when asset provides capabilities required by the Role behavior."
+    rule CapabilityCoverage [
+        realizesBehavior(role, b) &
+        requiresCapability(b, c) &
+        allocatedTo(role, a) &
+        providesCapability(a, c) &
+        Role(role) & Behavior(b) & Capability(c) & Asset(a)
+        -> isFeasiblyAssignedTo(role, a)
+    ]
+
+    @dc:description "MissionAssessment automatically aggregates all estimates from OPMs in the assessed engagement."
+    rule AssessmentAggregatesEstimates [
+        assesses(assessment, ep) &
+        contains(ep, opm) &
+        usesEstimator(opm, est) &
+        yields(est, estimate) &
+        MissionAssessment(assessment) & EngagementPlan(ep) & OPM(opm) &
+        SuccessProbabilityEstimator(est) & OPMSuccessEstimate(estimate)
+        -> aggregates(assessment, estimate)
+    ]
+
+    @dc:description "Commander notices are addressed to the commander who expressed an intent of the monitored plan."
+    rule KickbackAddressing [
+        triggers(assessment, notice) &
+        CommanderNotice(notice) &
+        monitors(assessment, plan) &
+        includesIntent(plan, intent) &
+        expresses(cmd, intent) &
+        MissionAssessment(assessment) & MissionPlan(plan) & Intent(intent) & MissionCommander(cmd)
+        -> sentTo(notice, cmd)
+    ]
+}

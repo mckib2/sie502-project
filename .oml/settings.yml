@@ -1,0 +1,27 @@
+# oml-code settings
+oml-code:
+  schemaVersion: 1
+
+# project npm settings
+project:
+  name: "@oml/cams"
+  version: 0.1.0
+  title: CAMS
+  description: Ontologies related to Collaborative Autonomy Management Systems.
+
+# source folders
+sources:
+  - src
+
+# oml server settings
+# By default the server binds a free port chosen by the OS (the actual port is
+# reported by 'oml list'), so multiple workspaces never collide. Uncomment to
+# pin a fixed port instead — but make sure no other workspace uses the same one.
+# server:
+#   port: 8080
+
+# Default CLI arguments per command, injected before your own (so you can override them on the
+# command line). Works for any oml command; key by command name. For example:
+# defaults:
+#   export: -o build/owl
+#   reason: -o build/owl -t

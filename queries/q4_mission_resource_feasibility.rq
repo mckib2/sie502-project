@@ -1,0 +1,28 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+PREFIX oml: <http://opencaesar.io/oml#>
+
+# Q4: Required resources accessible via Role allocation (owns/shares/none).
+SELECT ?opm ?role ?behavior ?resource ?asset ?access ?standoffM ?maxGsdM ?pixels ?fovDeg
+WHERE {
+  ?opm a cams:OPM ;
+       cams:contains ?role .
+  ?role cams:realizesBehavior ?behavior ;
+        cams:allocatedTo ?asset .
+  ?behavior cams:requiresResource ?resource .
+  OPTIONAL { ?asset cams:ownsResource ?resource . BIND(true AS ?owns) }
+  OPTIONAL { ?asset cams:sharesResource ?resource . BIND(true AS ?shares) }
+  BIND(
+    IF(BOUND(?owns), "owns",
+      IF(BOUND(?shares), "shares", "none")) AS ?access
+  )
+  OPTIONAL {
+    ?req a cams:ResourceRequirement ;
+         oml:hasSource ?behavior ;
+         oml:hasTarget ?resource .
+    OPTIONAL { ?req cams:expectedStandoffMeters ?standoffM }
+    OPTIONAL { ?req cams:maxGroundSampleDistanceMeters ?maxGsdM }
+  }
+  OPTIONAL { ?resource cams:horizontalPixelCount ?pixels }
+  OPTIONAL { ?resource cams:horizontalFOVDegrees ?fovDeg }
+}
+ORDER BY ?opm ?role ?resource

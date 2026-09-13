@@ -1,0 +1,128 @@
+@prefix cams: <https://example.com/cams/vocabulary#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# shapes for CAMS
+
+cams:OPMShape a sh:NodeShape ;
+  sh:targetClass cams:OPM ;
+  sh:property [
+    sh:path cams:contains ;
+    sh:minCount 1 ;
+    sh:message "OPM must contain at least one Role" ;
+  ] ;
+  sh:property [
+    sh:path cams:satisfies ;
+    sh:minCount 1 ;
+    sh:message "OPM must satisfy at least one Objective" ;
+  ] ;
+  sh:property [
+    sh:path cams:usesEstimator ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path cams:startsFrom ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path cams:predictsSuccessor ;
+    sh:maxCount 1 ;
+  ] .
+
+cams:RoleShape a sh:NodeShape ;
+  sh:targetClass cams:Role ;
+  sh:property [
+    sh:path cams:allocatedTo ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Role must be allocated to exactly one Asset" ;
+  ] ;
+  sh:property [
+    sh:path cams:realizesBehavior ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Role must realize exactly one Behavior" ;
+  ] .
+
+cams:IntentShape a sh:NodeShape ;
+  sh:targetClass cams:Intent ;
+  sh:property [
+    sh:path cams:isGatedBy ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Intent must have exactly one Constraint (spawn gate)" ;
+  ] ;
+  sh:property [
+    sh:path cams:activationStatus ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+cams:ObjectiveShape a sh:NodeShape ;
+  sh:targetClass cams:Objective ;
+  sh:property [
+    sh:path cams:isGatedBy ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+    sh:message "Objective must have exactly one Constraint (activation gate)" ;
+  ] ;
+  sh:property [
+    sh:path cams:activationStatus ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+cams:ConstraintShape a sh:NodeShape ;
+  sh:targetClass cams:Constraint ;
+  sh:property [
+    sh:path cams:comprisesCondition ;
+    sh:minCount 1 ;
+    sh:message "Constraint must include at least one Condition" ;
+  ] ;
+  sh:property [
+    sh:path cams:satisfactionStatus ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+cams:MissionPlanShape a sh:NodeShape ;
+  sh:targetClass cams:MissionPlan ;
+  sh:property [
+    sh:path cams:includesIntent ;
+    sh:minCount 1 ;
+  ] ;
+  sh:property [
+    sh:path cams:assignedTo ;
+    sh:maxCount 1 ;
+  ] .
+
+cams:EngagementPlanShape a sh:NodeShape ;
+  sh:targetClass cams:EngagementPlan ;
+  sh:property [
+    sh:path cams:realizes ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] ;
+  sh:property [
+    sh:path cams:isExecutedBy ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .
+
+cams:CommanderNoticeShape a sh:NodeShape ;
+  sh:targetClass cams:CommanderNotice ;
+  sh:property [
+    sh:path cams:sentTo ;
+    sh:minCount 0 ;
+    sh:message "sentTo may be derived by KickbackAddressing rule after reasoning" ;
+  ] .
+
+cams:MissionAssessmentShape a sh:NodeShape ;
+  sh:targetClass cams:MissionAssessment ;
+  sh:property [
+    sh:path cams:monitors ;
+    sh:minCount 1 ;
+    sh:maxCount 1 ;
+  ] .

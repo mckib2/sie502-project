@@ -1,0 +1,20 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Q5: Runtime resource contention: two distinct Roles (inter- or intra-OPM) whose allocated assets are executing and need the same resource.
+SELECT ?resource ?opm1 ?role1 ?asset1 ?opm2 ?role2 ?asset2 ?availability
+WHERE {
+  ?asset1 cams:isExecuting ?opm1 .
+  ?asset2 cams:isExecuting ?opm2 .
+  ?opm1 cams:contains ?role1 .
+  ?opm2 cams:contains ?role2 .
+  ?role1 cams:allocatedTo ?asset1 ;
+         cams:realizesBehavior ?b1 .
+  ?role2 cams:allocatedTo ?asset2 ;
+         cams:realizesBehavior ?b2 .
+  ?b1 cams:requiresResource ?resource .
+  ?b2 cams:requiresResource ?resource .
+  OPTIONAL { ?resource cams:availabilityStatus ?availability }
+  FILTER(?role1 != ?role2)
+  FILTER(STR(?role1) < STR(?role2))
+}
+ORDER BY ?resource ?role1 ?role2

@@ -1,0 +1,7 @@
+@dc:title "CAMS Description Bundle"
+@dc:description "Packages all CAMS project descriptions with the vocabulary bundle."
+description bundle <https://example.com/cams/project/bundle#> as cams-d-bundle {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <https://example.com/cams/bundle#>
+    includes <https://example.com/cams/project/description#>
+}

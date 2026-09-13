@@ -1,0 +1,21 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+# Q6: Probability of Success estimates for OPMs satisfying active objectives; assessments and responses
+SELECT ?assessment ?composed ?response ?opm ?estimate ?prob ?objective ?threshold
+WHERE {
+  ?assessment a cams:MissionAssessment ;
+              cams:monitors ?mission ;
+              cams:composedSuccessProbability ?composed .
+  OPTIONAL { ?assessment cams:triggers ?response }
+  ?assessment cams:aggregates ?estimate .
+  ?estimate cams:estimatedSuccessProbability ?prob .
+  OPTIONAL {
+    ?est cams:yields ?estimate .
+    ?opm cams:usesEstimator ?est ;
+         cams:satisfies ?objective .
+    ?objective cams:activationStatus "Active" ;
+               cams:successProbabilityThreshold ?threshold .
+  }
+}
+ORDER BY ?assessment ?opm

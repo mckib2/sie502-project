@@ -1,0 +1,6 @@
+@dc:title "CAMS Vocabulary Bundle"
+@dc:description "Packages CAMS vocabulary so sibling disjointness and closure axioms are enforced under reasoning."
+vocabulary bundle <https://example.com/cams/bundle#> as cams-v-bundle {
+    includes <http://purl.org/dc/elements/1.1/> as dc
+    includes <https://example.com/cams/vocabulary#>
+}
