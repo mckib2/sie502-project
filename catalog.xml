@@ -1,0 +1,6 @@
+<?xml version='1.0'?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+	<rewriteURI uriStartString="https://example.com/cams/denied/project/" rewritePrefix="src/model/oml/example.com/cams/denied/project/" />
+	<rewriteURI uriStartString="https://example.com/cams/denied/" rewritePrefix="src/method/oml/example.com/cams/denied/" />
+	<rewriteURI uriStartString="https://example.com/cams/" rewritePrefix="src/method/oml/example.com/cams/" />
+</catalog>

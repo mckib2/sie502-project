@@ -12,20 +12,25 @@ I then iterated, trying to move everything from the ABox I could to the TBox, es
 ## Layout
 
 ```
+METHOD.md                     # method narrative
+catalog.xml                   # IRI rewrites for OML Code
 src/method/oml/example.com/cams/
   vocabulary.oml              # core CAMS TBox (domain-neutral)
-  bundle.oml                  # core vocabulary bundle
-  denied/
-    vocabulary.oml            # denied-ISR domain TBox (imaging/RF, AssetKind, countersThreat)
-    bundle.oml                # core + denied vocabulary bundle
+  bundle.oml
+  denied/                     # denied domain TBox
+src/method/md/example.com/cams/
+  authority.md mission.md engagement.md platform.md   # compose templates + SHACL
+src/model/md/CAMS Denied/     # compose pages (viewpoint UI)
 src/model/oml/example.com/cams/denied/project/
-  description.oml             # showcase ABox (uses cams + denied)
-  bundle.oml                  # description bundle
-queries/                      # SPARQL + SHACL shapes
+  description.oml             # scenario ABox
+  bundle.oml
+queries/                      # SPARQL regression + shapes.ttl (auto-updated from md)
 scripts/evaluate_queries.py
+scripts/sync_shapes_from_md.py
 ```
 
-Core vocabulary stays generic collaborative-autonomy management. Domain physics and dispositions live in `denied/`; the scenario description is packaged with that domain module.
+See [METHOD.md](METHOD.md) for patterns and business rules.
+Refresh shapes after editing pattern md: `python scripts/sync_shapes_from_md.py`.
 
 Start the OML server from the CLI (preferred when not using the VS Code extension):
 

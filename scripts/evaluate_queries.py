@@ -487,12 +487,19 @@ def main() -> int:
     check_priority_inheritance(g)
     check_commander_notices(g)
 
-    shapes = QUERIES / "shapes.ttl"
     print("\n=== SHACL ===")
     if shacl_validate is None:
         print("  pyshacl not installed")
         return 1
+    # Refresh shapes.ttl from pattern markdown (source of truth)
+    sync = ROOT / "scripts" / "sync_shapes_from_md.py"
+    if sync.exists():
+        import runpy
+
+        runpy.run_path(str(sync))
+    shapes = QUERIES / "shapes.ttl"
     sg = Graph().parse(shapes, format="turtle")
+
     conforms, report_graph, report_text = shacl_validate(
         g,
         shacl_graph=sg,

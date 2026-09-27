@@ -1,128 +1,507 @@
+# Generated from src/method/md/example.com/cams/*.md — do not hand-edit.
+# Source of truth: pattern markdown. Refresh: python scripts/sync_shapes_from_md.py
+
+# from authority.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix cams: <https://example.com/cams/vocabulary#> .
-@prefix sh:   <http://www.w3.org/ns/shacl#> .
-@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
-@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-# shapes for CAMS
+cams:MissionCommanderShape
+    a sh:NodeShape ;
+    sh:targetClass cams:MissionCommander ;
+    dash:readOnly true ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:expresses ;
+        sh:name "Expresses Intent" ;
+        sh:class cams:Intent ;
+        dash:readOnly true ;
+        sh:order 2 ;
+    ] ;
+    .
 
-cams:OPMShape a sh:NodeShape ;
-  sh:targetClass cams:OPM ;
-  sh:property [
-    sh:path cams:contains ;
-    sh:minCount 1 ;
-    sh:message "OPM must contain at least one Role" ;
-  ] ;
-  sh:property [
-    sh:path cams:satisfies ;
-    sh:minCount 1 ;
-    sh:message "OPM must satisfy at least one Objective" ;
-  ] ;
-  sh:property [
-    sh:path cams:usesEstimator ;
-    sh:minCount 1 ;
-  ] ;
-  sh:property [
-    sh:path cams:startsFrom ;
-    sh:maxCount 1 ;
-  ] ;
-  sh:property [
-    sh:path cams:predictsSuccessor ;
-    sh:maxCount 1 ;
-  ] .
+# from authority.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
 
-cams:RoleShape a sh:NodeShape ;
-  sh:targetClass cams:Role ;
-  sh:property [
-    sh:path cams:allocatedTo ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-    sh:message "Role must be allocated to exactly one Asset" ;
-  ] ;
-  sh:property [
-    sh:path cams:realizesBehavior ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-    sh:message "Role must realize exactly one Behavior" ;
-  ] .
+cams:IntentShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Intent ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:priority ;
+        sh:name "Priority" ;
+        sh:datatype xsd:string ;
+        sh:in ( "Low" "Medium" "High" ) ;
+        sh:maxCount 1 ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:isGatedBy ;
+        sh:name "Spawn gate (Constraint)" ;
+        sh:class cams:Constraint ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Intent must have exactly one Constraint (spawn gate)." ;
+        sh:order 3 ;
+    ] ;
+    sh:property [
+        sh:path cams:spawns ;
+        sh:name "Spawns Objective" ;
+        sh:class cams:Objective ;
+        sh:order 4 ;
+    ] ;
+    sh:property [
+        sh:path cams:activationStatus ;
+        sh:name "Activation" ;
+        sh:datatype xsd:string ;
+        dash:readOnly true ;
+        sh:maxCount 1 ;
+        sh:order 5 ;
+    ] ;
+    .
 
-cams:IntentShape a sh:NodeShape ;
-  sh:targetClass cams:Intent ;
-  sh:property [
-    sh:path cams:isGatedBy ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-    sh:message "Intent must have exactly one Constraint (spawn gate)" ;
-  ] ;
-  sh:property [
-    sh:path cams:activationStatus ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-  ] .
+# from authority.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
 
-cams:ObjectiveShape a sh:NodeShape ;
-  sh:targetClass cams:Objective ;
-  sh:property [
-    sh:path cams:isGatedBy ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-    sh:message "Objective must have exactly one Constraint (activation gate)" ;
-  ] ;
-  sh:property [
-    sh:path cams:activationStatus ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-  ] .
+cams:ConstraintShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Constraint ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:comprisesCondition ;
+        sh:name "Condition" ;
+        sh:class cams:Condition ;
+        sh:minCount 1 ;
+        sh:message "Constraint must include at least one Condition." ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:satisfactionStatus ;
+        sh:name "Satisfaction" ;
+        sh:datatype xsd:string ;
+        sh:in ( "Satisfied" "Unsatisfied" ) ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Constraint must assert Satisfied or Unsatisfied." ;
+        sh:order 3 ;
+    ] ;
+    .
 
-cams:ConstraintShape a sh:NodeShape ;
-  sh:targetClass cams:Constraint ;
-  sh:property [
-    sh:path cams:comprisesCondition ;
-    sh:minCount 1 ;
-    sh:message "Constraint must include at least one Condition" ;
-  ] ;
-  sh:property [
-    sh:path cams:satisfactionStatus ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-  ] .
+# from authority.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
 
-cams:MissionPlanShape a sh:NodeShape ;
-  sh:targetClass cams:MissionPlan ;
-  sh:property [
-    sh:path cams:includesIntent ;
-    sh:minCount 1 ;
-  ] ;
-  sh:property [
-    sh:path cams:assignedTo ;
-    sh:maxCount 1 ;
-  ] .
+cams:ConditionShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Condition ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:satisfactionStatus ;
+        sh:name "Satisfaction" ;
+        sh:datatype xsd:string ;
+        sh:in ( "Satisfied" "Unsatisfied" ) ;
+        sh:maxCount 1 ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:isEvaluatedAgainst ;
+        sh:name "Evaluated against" ;
+        sh:class cams:EvaluationContext ;
+        sh:order 3 ;
+    ] ;
+    .
 
-cams:EngagementPlanShape a sh:NodeShape ;
-  sh:targetClass cams:EngagementPlan ;
-  sh:property [
-    sh:path cams:realizes ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-  ] ;
-  sh:property [
-    sh:path cams:isExecutedBy ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-  ] .
+# from engagement.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
 
-cams:CommanderNoticeShape a sh:NodeShape ;
-  sh:targetClass cams:CommanderNotice ;
-  sh:property [
-    sh:path cams:sentTo ;
-    sh:minCount 0 ;
-    sh:message "sentTo may be derived by KickbackAddressing rule after reasoning" ;
-  ] .
+cams:EngagementPlanShape
+    a sh:NodeShape ;
+    sh:targetClass cams:EngagementPlan ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:realizes ;
+        sh:name "Realizes Mission" ;
+        sh:class cams:MissionPlan ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "EngagementPlan must realize exactly one MissionPlan." ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:isExecutedBy ;
+        sh:name "Executed by Team" ;
+        sh:class cams:Team ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "EngagementPlan must be executed by exactly one Team." ;
+        sh:order 3 ;
+    ] ;
+    sh:property [
+        sh:path cams:contains ;
+        sh:name "Contains OPM" ;
+        sh:class cams:OPM ;
+        sh:minCount 1 ;
+        sh:message "EngagementPlan should contain at least one OPM." ;
+        sh:order 4 ;
+    ] ;
+    .
 
-cams:MissionAssessmentShape a sh:NodeShape ;
-  sh:targetClass cams:MissionAssessment ;
-  sh:property [
-    sh:path cams:monitors ;
-    sh:minCount 1 ;
-    sh:maxCount 1 ;
-  ] .
+cams:OPMShape
+    a sh:NodeShape ;
+    sh:targetClass cams:OPM ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:contains ;
+        sh:name "Contains Role" ;
+        sh:class cams:Role ;
+        sh:minCount 1 ;
+        sh:message "OPM must contain at least one Role (bind a Behavior to an Asset)." ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:satisfies ;
+        sh:name "Satisfies Objective" ;
+        sh:class cams:Objective ;
+        sh:minCount 1 ;
+        sh:message "OPM must satisfy at least one Objective." ;
+        sh:order 3 ;
+    ] ;
+    sh:property [
+        sh:path cams:usesEstimator ;
+        sh:name "Uses Estimator" ;
+        sh:class cams:SuccessProbabilityEstimator ;
+        sh:minCount 1 ;
+        sh:message "OPM should use at least one success-probability estimator." ;
+        sh:order 4 ;
+    ] ;
+    sh:property [
+        sh:path cams:precedes ;
+        sh:name "Precedes OPM" ;
+        sh:class cams:OPM ;
+        sh:order 5 ;
+    ] ;
+    .
+
+cams:RoleShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Role ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:realizesBehavior ;
+        sh:name "Behavior" ;
+        sh:class cams:Behavior ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Role must realize exactly one Behavior." ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:allocatedTo ;
+        sh:name "Allocated Asset" ;
+        sh:class cams:Asset ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Role must be allocated to exactly one Asset." ;
+        sh:order 3 ;
+    ] ;
+
+    sh:sparql [
+        sh:message "Allocated Asset is not a member of the Team executing this Role's EngagementPlan." ;
+        sh:select """
+            PREFIX cams: <https://example.com/cams/vocabulary#>
+            SELECT $this WHERE {
+                $this cams:allocatedTo ?asset .
+                ?opm cams:contains $this .
+                ?ep a cams:EngagementPlan ;
+                    cams:contains ?opm ;
+                    cams:isExecutedBy ?team .
+                FILTER NOT EXISTS { ?team cams:includesMember ?asset }
+            }
+        """ ;
+    ] ;
+
+    sh:sparql [
+        sh:message "Allocated Asset does not provide a Capability required by this Role's Behavior." ;
+        sh:select """
+            PREFIX cams: <https://example.com/cams/vocabulary#>
+            SELECT $this WHERE {
+                $this cams:allocatedTo ?asset ;
+                      cams:realizesBehavior ?beh .
+                ?beh cams:requiresCapability ?cap .
+                FILTER NOT EXISTS { ?asset cams:providesCapability ?cap }
+            }
+        """ ;
+    ] ;
+    .
+
+# from mission.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
+
+cams:MissionPlanShape
+    a sh:NodeShape ;
+    sh:targetClass cams:MissionPlan ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:includesIntent ;
+        sh:name "Includes Intent" ;
+        sh:class cams:Intent ;
+        sh:minCount 1 ;
+        sh:message "MissionPlan must include at least one Intent." ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:includesObjective ;
+        sh:name "Includes Objective" ;
+        sh:class cams:Objective ;
+        sh:order 3 ;
+    ] ;
+    sh:property [
+        sh:path cams:assignedTo ;
+        sh:name "Assigned Team" ;
+        sh:class cams:Team ;
+        sh:maxCount 1 ;
+        sh:message "MissionPlan may be assigned to at most one Team." ;
+        sh:order 4 ;
+    ] ;
+    .
+
+# from mission.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
+
+cams:ObjectiveShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Objective ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:successProbabilityThreshold ;
+        sh:name "PoS threshold" ;
+        sh:datatype xsd:decimal ;
+        sh:maxCount 1 ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:isGatedBy ;
+        sh:name "Activation gate (Constraint)" ;
+        sh:class cams:Constraint ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Objective must have exactly one Constraint (activation gate)." ;
+        sh:order 3 ;
+    ] ;
+    sh:property [
+        sh:path cams:precedes ;
+        sh:name "Precedes" ;
+        sh:class cams:Objective ;
+        sh:order 4 ;
+    ] ;
+    sh:property [
+        sh:path cams:activationStatus ;
+        sh:name "Activation" ;
+        sh:datatype xsd:string ;
+        dash:readOnly true ;
+        sh:maxCount 1 ;
+        sh:order 5 ;
+    ] ;
+    .
+
+# from platform.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
+
+cams:TeamShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Team ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:includesMember ;
+        sh:name "Member Asset" ;
+        sh:class cams:Asset ;
+        sh:minCount 1 ;
+        sh:message "Team should include at least one Asset member." ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:maintainsSA ;
+        sh:name "Situational Awareness" ;
+        sh:class cams:SituationalAwareness ;
+        sh:order 3 ;
+    ] ;
+    .
+
+# from platform.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
+@prefix denied: <https://example.com/cams/denied/vocabulary#> .
+
+cams:AssetShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Asset ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path denied:assetKind ;
+        sh:name "Asset kind (domain)" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:providesCapability ;
+        sh:name "Provides Capability" ;
+        sh:class cams:Capability ;
+        sh:minCount 1 ;
+        sh:message "Asset should provide at least one Capability for Role allocation." ;
+        sh:order 3 ;
+    ] ;
+    sh:property [
+        sh:path cams:ownsResource ;
+        sh:name "Owns Resource" ;
+        sh:class cams:Resource ;
+        sh:order 4 ;
+    ] ;
+    sh:property [
+        sh:path cams:isExecuting ;
+        sh:name "Executing OPM" ;
+        sh:class cams:OPM ;
+        sh:maxCount 1 ;
+        sh:order 5 ;
+    ] ;
+    .
+
+# from platform.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
+
+cams:CapabilityShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Capability ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    .
+
+# from platform.md
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dash: <http://datashapes.org/dash#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cams: <https://example.com/cams/vocabulary#> .
+
+cams:BehaviorShape
+    a sh:NodeShape ;
+    sh:targetClass cams:Behavior ;
+    dash:readOnly true ;
+    sh:property [
+        sh:path cams:name ;
+        sh:name "Name" ;
+        sh:datatype xsd:string ;
+        sh:maxCount 1 ;
+        sh:order 1 ;
+    ] ;
+    sh:property [
+        sh:path cams:requiresCapability ;
+        sh:name "Requires Capability" ;
+        sh:class cams:Capability ;
+        dash:readOnly true ;
+        sh:order 2 ;
+    ] ;
+    sh:property [
+        sh:path cams:requiresResource ;
+        sh:name "Requires Resource" ;
+        sh:class cams:Resource ;
+        dash:readOnly true ;
+        sh:order 3 ;
+    ] ;
+    .

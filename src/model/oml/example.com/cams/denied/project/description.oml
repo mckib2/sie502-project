@@ -61,8 +61,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:isEvaluatedAgainst WS_GT
     ]
 
-    // ----- Mission plan and objectives -----
-
     instance MissionDeny1 : cams:MissionPlan [
         cams:name "ISR/Strike Mission Deny-1"
         cams:includesIntent IntentFindFix
@@ -138,8 +136,8 @@ description <https://example.com/cams/denied/project/description#> as denied-des
 
     instance ObjLoiterConstraint : cams:Constraint [
         cams:name "Loiter only in clear weather and safe zone"
-        cams:comprisesCondition CondLoiterWeather
-        cams:comprisesCondition CondLoiterSafe
+        cams:comprisesCondition CondLoiterWeather, CondLoiterSafe
+        cams:satisfactionStatus "Satisfied"
     ]
 
     instance CondLoiterWeather : cams:Condition [
@@ -153,8 +151,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:satisfactionStatus "Satisfied"
         cams:isEvaluatedAgainst HazardSAM
     ]
-
-    // ----- Teams, assets, capabilities, resources -----
 
     instance TeamAlpha : cams:Team [
         cams:name "Team Alpha"
@@ -170,10 +166,21 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:maintainsSA TeamBravoSA
     ]
 
-    instance CapSearch : cams:Capability [ cams:name "Wide-area search" ]
-    instance CapStrike : cams:Capability [ cams:name "Precision strike" ]
-    instance CapBDA : cams:Capability [ cams:name "Battle damage assessment sensing" ]
-    instance CapJam : cams:Capability [ cams:name "RF jamming" ]
+    instance CapSearch : cams:Capability [
+        cams:name "Wide-area search"
+    ]
+
+    instance CapStrike : cams:Capability [
+        cams:name "Precision strike"
+    ]
+
+    instance CapBDA : cams:Capability [
+        cams:name "Battle damage assessment sensing"
+    ]
+
+    instance CapJam : cams:Capability [
+        cams:name "RF jamming"
+    ]
 
     instance RQ23_Recon : cams:Asset [
         cams:name "RQ-23 Recon-1"
@@ -209,7 +216,7 @@ description <https://example.com/cams/denied/project/description#> as denied-des
 
     instance SensorEOIR : cams:SensorResource [
         cams:name "Shared EO/IR pod"
-        denied:horizontalPixelCount "3840"^^xsd:integer // NBPM: these aren't real values, I just made them up to look plausible
+        denied:horizontalPixelCount "3840"^^xsd:integer
         denied:horizontalFOVDegrees "20.0"^^xsd:decimal
     ]
 
@@ -241,8 +248,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         denied:horizontalFOVDegrees "40.0"^^xsd:decimal
     ]
 
-    // ----- Behaviors -----
-
     instance BehSearch : cams:Behavior [
         cams:name "CoordinatedSearch"
         cams:requiresCapability CapSearch
@@ -267,11 +272,10 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:requiresCapability CapBDA
     ]
 
-    // Need ~0.5 m GSD at planned standoff to classify damage; GSD ~= R*tan(FOV/pixels).
     relation instance BDA_Needs_EOIR : cams:ResourceRequirement [
         from BehBDA
         to SensorEOIR
-        denied:expectedStandoffMeters "4000"^^xsd:decimal // NBPM: it's a bummer to me that I can't figure out how to "generate" this from reasoning or some other language, so I hard-code
+        denied:expectedStandoffMeters "4000"^^xsd:decimal
         denied:maxGroundSampleDistanceMeters "0.5"^^xsd:decimal
     ]
 
@@ -280,7 +284,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:requiresCapability CapJam
     ]
 
-    // Power/standoff on the requirement; emitter frequency/bandwidth come from countersThreat.
     relation instance Jam_Needs_Comm : cams:ResourceRequirement [
         from BehJam
         to CommJam
@@ -293,8 +296,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:name "LoiterAtPoint"
         cams:requiresCapability CapSearch
     ]
-
-    // ----- World state / SA -----
 
     instance WS_GT : cams:WorldState [
         cams:name "Ground-truth COP"
@@ -350,8 +351,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:believes WS_BeliefAlpha
     ]
 
-    // ----- Predicted world states -----
-
     instance WS0 : cams:PredictedWorldState [
         cams:name "Predicted state before OPM1"
         cams:includesFacet ThreatEmitter42
@@ -394,8 +393,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:name "BDA refines threat assessment"
         cams:affectsFacet ThreatEmitter42
     ]
-
-    // ----- Engagement Alpha -----
 
     instance EngagementAlpha : cams:EngagementPlan [
         cams:name "Alpha engagement for Mission Deny-1"
@@ -462,9 +459,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:allocatedTo RQ23_Recon
     ]
 
-    // Note: OPM_JamAndStrike input WS1 is derived by StateChain from OPM_Search.predictsSuccessor
-    // OPM_BDA input WS2 derived from OPM_JamAndStrike.predictsSuccessor
-
     instance EstSearch : cams:SuccessProbabilityEstimator [
         cams:name "Search PoS estimator"
         cams:yields EstSearchResult
@@ -505,8 +499,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:estimatedSuccessProbability "0.95"^^xsd:decimal
     ]
 
-    // ----- Engagement Bravo -----
-
     instance EngagementBravo : cams:EngagementPlan [
         cams:name "Bravo alternate engagement"
         cams:realizes MissionDeny1
@@ -538,8 +530,6 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:name "Bravo search estimate"
         cams:estimatedSuccessProbability "0.70"^^xsd:decimal
     ]
-
-    // ----- Assessments -----
 
     instance AssessmentAlphaFeasible : cams:MissionAssessment [
         cams:name "Alpha PoS monitor -- thresholds met"
