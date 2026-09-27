@@ -33,8 +33,9 @@ Rules are enforced in pattern shapes, e.g.:
 
 1. An OPM must contain at least one Role.
 2. A Role must be allocated to exactly one Asset.
-3. That Asset must belong to the Team executing the EngagementPlan that contains the Role's OPM.
-4. That Asset must provide every Capability required by the Role's Behavior.
+3. A Role belongs to exactly one OPM (`isContainedBy` exactly 1, i.e., do not reuse Roles across OPMs).
+4. That Asset must belong to the Team executing the EngagementPlan that contains the Role's OPM.
+5. That Asset must provide every Capability required by the Role's Behavior.
 
 Structural checks (e.g., Intent/Objective `isGatedBy`, Constraint has Conditions) are implemented as property shapes.
 

@@ -258,6 +258,15 @@ cams:RoleShape
         sh:message "Role must be allocated to exactly one Asset." ;
         sh:order 3 ;
     ] ;
+    sh:property [
+        sh:path cams:isContainedBy ;
+        sh:name "Owning OPM" ;
+        sh:class cams:OPM ;
+        sh:minCount 1 ;
+        sh:maxCount 1 ;
+        sh:message "Role must belong to exactly one OPM (do not reuse a Role across OPMs)." ;
+        sh:order 4 ;
+    ] ;
 
     sh:sparql [
         sh:message "Allocated Asset is not a member of the Team executing this Role's EngagementPlan." ;

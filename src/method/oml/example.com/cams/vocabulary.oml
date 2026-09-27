@@ -86,10 +86,11 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
     @dc:description "Ordered objective plan module that realizes an Objective."
     concept OPM < Container, Contained, Executable
 
-    @dc:description "Fillable slot inside an OPM's execution specification: a behavior bound to an Asset."
+    @dc:description "Fillable slot inside an OPM's execution specification: a behavior bound to an Asset. Exactly one parent Container (the owning OPM); Roles are not shared across OPMs."
     concept Role < Contained [
         restricts realizesBehavior to exactly 1
         restricts allocatedTo to exactly 1
+        restricts isContainedBy to exactly 1
     ]
 
 
@@ -123,7 +124,7 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
     @dc:description "Selectable type-level resource need in requiresResource (not owned hardware). ABox tokens are named like the class they stand for (e.g. ImagingSensorResource)."
     concept ResourceTypeToken < Resource
 
-    @dc:description "Token: any SensorResource (imaging or radar) satisfies."
+    @dc:description "Token: any SensorResource satisfies."
     concept SensorResourceToken < ResourceTypeToken
 
     @dc:description "Token: any ImagingSensorResource satisfies."
