@@ -30,11 +30,6 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
         oneOf "Ready", "Degraded", "Unavailable"
     ] = xsd:string
 
-    @dc:description "Primary mission role of an Asset."
-    scalar AssetKind [
-        oneOf "Recon", "Strike", "Jamming", "MultiRole"
-    ] = xsd:string
-
     @dc:description "Whether a Resource is free or in use."
     scalar AvailabilityStatus [
         oneOf "Available", "Busy"
@@ -111,13 +106,13 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
     @dc:description "Potentially contested platform resource."
     concept Resource < Identified
 
-    @dc:description "Imaging sensor platform resource (pixels / FOV)."
+    @dc:description "Sensing platform resource."
     concept SensorResource < Resource
 
-    @dc:description "Onboard compute resource (peak TFLOPS)."
+    @dc:description "Onboard compute platform resource."
     concept ComputeResource < Resource
 
-    @dc:description "Communications or RF jammer resource (power / band)."
+    @dc:description "Communications platform resource."
     concept CommResource < Resource
 
 
@@ -133,13 +128,13 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
     @dc:description "World-state facet describing one Asset's reported condition."
     concept AssetState < WorldStateFacet
 
-    @dc:description "Hostile or relevant emitter / adversary object in the COP."
+    @dc:description "Entity in the COP that is relevant as a contested or opposing track."
     concept Threat < WorldStateFacet
 
-    @dc:description "Geographic or envelope hazard with some keep-out zone."
+    @dc:description "Geographic or environmental hazard facet in the COP."
     concept Hazard < WorldStateFacet
 
-    @dc:description "Atmospheric / ceiling conditions affecting sensors and flight."
+    @dc:description "Atmospheric or weather facet in the COP."
     concept WeatherCondition < WorldStateFacet
 
     @dc:description "How an Asset or Team currently understands the world (may not align with actual or true world state)."
@@ -203,13 +198,6 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
         functional
     ]
 
-    @dc:description "Primary role class of an Asset."
-    scalar property assetKind [
-        domain Asset
-        range AssetKind
-        functional
-    ]
-
     @dc:description "Busy when an executing OPM's behavior requires this resource (i.e., ResourceOccupied*)."
     scalar property availabilityStatus [
         domain Resource
@@ -221,104 +209,6 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
     scalar property readinessStatus [
         domain AssetState
         range ReadinessStatus
-        functional
-    ]
-
-    @dc:description "Horizontal pixel count of an imaging sensor."
-    scalar property horizontalPixelCount [
-        domain SensorResource
-        range xsd:integer
-        functional
-    ]
-
-    @dc:description "Horizontal field of view in degrees."
-    scalar property horizontalFOVDegrees [
-        domain SensorResource
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Peak compute throughput (TFLOPS) available compute."
-    scalar property peakTeraflops [
-        domain ComputeResource
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Keep-out radius around a hazard (meters)."
-    scalar property keepOutRadiusMeters [
-        domain Hazard
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Cloud / weather ceiling (meters AGL)."
-    scalar property ceilingMeters [
-        domain WeatherCondition
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Planner-assumed slant range (meters) from asset to observed object for this requirement."
-    scalar property expectedStandoffMeters [
-        domain ResourceRequirement
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Maximum acceptable ground sample distance (meters/pixel) for the behavior to succeed with this sensor."
-    scalar property maxGroundSampleDistanceMeters [
-        domain ResourceRequirement
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Minimum transmit power (Watts) the jammer must provide at the planned standoff."
-    scalar property minTransmitPowerWatts [
-        domain ResourceRequirement
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Emitter center frequency (Hz) (asserted on the Threat)."
-    scalar property centerFrequencyHz [
-        domain Threat
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Emitter occupied bandwidth (Hz)."
-    scalar property emissionBandwidthHz [
-        domain Threat
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Maximum RF transmit power of a comm/jammer resource (W)."
-    scalar property maxTransmitPowerWatts [
-        domain CommResource
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Instantaneous bandwidth the jammer can achieve (Hz)."
-    scalar property jammingBandwidthHz [
-        domain CommResource
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Lower bound of jammer tunable frequency (Hz)."
-    scalar property minOperatingFrequencyHz [
-        domain CommResource
-        range xsd:decimal
-        functional
-    ]
-
-    @dc:description "Upper bound of jammer tunable frequency (Hz)."
-    scalar property maxOperatingFrequencyHz [
-        domain CommResource
-        range xsd:decimal
         functional
     ]
 
@@ -495,14 +385,6 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
         to Resource
         forward requiresResource
         reverse isResourceRequiredBy
-    ]
-
-    @dc:description "Jam (or similar) requirement is sized against a specific emitting Threat; frequency/bandwidth from Threat."
-    relation countersThreat [
-        from ResourceRequirement
-        to Threat
-        reverse isCounteredBy
-        functional
     ]
 
     @dc:description "Asset owns a Resource."

@@ -13,14 +13,19 @@ I then iterated, trying to move everything from the ABox I could to the TBox, es
 
 ```
 src/method/oml/example.com/cams/
-  vocabulary.oml     # TBox
-  bundle.oml         # vocabulary bundle (disjointness / closure)
-src/model/oml/example.com/cams/project/
-  description.oml    # ABox scenario
-  bundle.oml         # description bundle
-queries/             # SPARQL + SHACL shapes
+  vocabulary.oml              # core CAMS TBox (domain-neutral)
+  bundle.oml                  # core vocabulary bundle
+  denied/
+    vocabulary.oml            # denied-ISR domain TBox (imaging/RF, AssetKind, countersThreat)
+    bundle.oml                # core + denied vocabulary bundle
+src/model/oml/example.com/cams/denied/project/
+  description.oml             # showcase ABox (uses cams + denied)
+  bundle.oml                  # description bundle
+queries/                      # SPARQL + SHACL shapes
 scripts/evaluate_queries.py
 ```
+
+Core vocabulary stays generic collaborative-autonomy management. Domain physics and dispositions live in `denied/`; the scenario description is packaged with that domain module.
 
 Start the OML server from the CLI (preferred when not using the VS Code extension):
 
@@ -85,4 +90,4 @@ PoS composition model:
 
 OPMExecuting (Horn convention for open-world): the rule sets `executionStatus` to Executing when *any* allocated Role's asset asserts `isExecuting` that OPM (existential). Requiring *all* roles to check in is checked procedurally in `scripts/evaluate_queries.py` (`check_opm_role_checkin`) because SWRL cannot express that universal quantification.
 
-Other checks in `evaluate_queries.py`: imaging GSD (needs `tan` -- not builtin to SWRL for some reason...), jam RF band/power math, two-tier PoS product vs asserted assessments, constraint roll-up, state chain, occupancy, priority inheritance, KickbackAddressing `sentTo`, SHACL.
+Other checks in `evaluate_queries.py`: imaging GSD / jam RF math over **denied** vocabulary properties (needs `tan` — not in SWRL), two-tier PoS product vs asserted assessments, constraint roll-up, state chain, occupancy, priority inheritance, KickbackAddressing `sentTo`, SHACL.

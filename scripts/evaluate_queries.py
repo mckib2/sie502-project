@@ -19,15 +19,21 @@ ROOT = Path(__file__).resolve().parents[1]
 OWL_DIR = ROOT / "build" / "owl"
 QUERIES = ROOT / "queries"
 CAMS = Namespace("https://example.com/cams/vocabulary#")
-DESC = Namespace("https://example.com/cams/project/description#")
+DESC = Namespace("https://example.com/cams/denied/project/description#")
+DENIED = Namespace("https://example.com/cams/denied/vocabulary#")
 
 
 def load_graph() -> Graph:
     g = Graph()
-    vocab = OWL_DIR / "example.com/cams/vocabulary.ttl"
-    desc = OWL_DIR / "example.com/cams/project/description.ttl"
-    bundle = OWL_DIR / "example.com/cams/bundle.ttl"
-    for path in (vocab, desc, bundle):
+    required = [
+        OWL_DIR / "example.com/cams/vocabulary.ttl",
+        OWL_DIR / "example.com/cams/denied/vocabulary.ttl",
+        OWL_DIR / "example.com/cams/denied/project/description.ttl",
+        OWL_DIR / "example.com/cams/bundle.ttl",
+        OWL_DIR / "example.com/cams/denied/bundle.ttl",
+        OWL_DIR / "example.com/cams/denied/project/bundle.ttl",
+    ]
+    for path in required:
         if not path.exists():
             raise SystemExit(
                 f"Missing {path}. Run: oml export -o build/owl --pretty "
@@ -36,7 +42,7 @@ def load_graph() -> Graph:
         g.parse(path, format="turtle")
     # Also load reasoned entailments if present beside asserted files
     for ent in OWL_DIR.rglob("*.ttl"):
-        if ent in (vocab, desc, bundle):
+        if ent in required:
             continue
         if "example.com/cams" in str(ent):
             g.parse(ent, format="turtle")
@@ -69,7 +75,7 @@ def check_pos_product(g: Graph) -> None:
     PREFIX cams: <https://example.com/cams/vocabulary#>
     SELECT ?opm ?prob ?threshold ?objective
     WHERE {
-      <https://example.com/cams/project/description#EngagementAlpha>
+      <https://example.com/cams/denied/project/description#EngagementAlpha>
         cams:contains ?opm .
       ?opm cams:usesEstimator ?est ;
            cams:satisfies ?objective .
@@ -114,8 +120,8 @@ def check_pos_product(g: Graph) -> None:
         SELECT ?assessment ?composed
         WHERE {
           VALUES ?assessment {
-            <https://example.com/cams/project/description#AssessmentAlphaFeasible>
-            <https://example.com/cams/project/description#AssessmentDeactivate>
+            <https://example.com/cams/denied/project/description#AssessmentAlphaFeasible>
+            <https://example.com/cams/denied/project/description#AssessmentDeactivate>
           }
           ?assessment cams:composedSuccessProbability ?composed .
         }
@@ -309,16 +315,17 @@ def check_gsd_feasibility(g: Graph) -> None:
     print("\n=== Imaging GSD feasibility (ResourceRequirement) ===")
     q = """
     PREFIX cams: <https://example.com/cams/vocabulary#>
+    PREFIX denied: <https://example.com/cams/denied/vocabulary#>
     PREFIX oml: <http://opencaesar.io/oml#>
     SELECT ?req ?behavior ?resource ?standoff ?maxGsd ?pixels ?fov
     WHERE {
       ?req a cams:ResourceRequirement ;
            oml:hasSource ?behavior ;
            oml:hasTarget ?resource ;
-           cams:expectedStandoffMeters ?standoff ;
-           cams:maxGroundSampleDistanceMeters ?maxGsd .
-      ?resource cams:horizontalPixelCount ?pixels ;
-                cams:horizontalFOVDegrees ?fov .
+           denied:expectedStandoffMeters ?standoff ;
+           denied:maxGroundSampleDistanceMeters ?maxGsd .
+      ?resource denied:horizontalPixelCount ?pixels ;
+                denied:horizontalFOVDegrees ?fov .
     }
     """
     rows = list(g.query(q))
@@ -345,6 +352,7 @@ def check_jam_feasibility(g: Graph) -> None:
     print("\n=== Jamming RF feasibility (ResourceRequirement countersThreat) ===")
     q = """
     PREFIX cams: <https://example.com/cams/vocabulary#>
+    PREFIX denied: <https://example.com/cams/denied/vocabulary#>
     PREFIX oml: <http://opencaesar.io/oml#>
     SELECT ?req ?behavior ?resource ?threat ?standoff ?minP ?maxP
            ?jamBw ?fMin ?fMax ?fCenter ?emBw
@@ -352,15 +360,15 @@ def check_jam_feasibility(g: Graph) -> None:
       ?req a cams:ResourceRequirement ;
            oml:hasSource ?behavior ;
            oml:hasTarget ?resource ;
-           cams:countersThreat ?threat ;
-           cams:expectedStandoffMeters ?standoff ;
-           cams:minTransmitPowerWatts ?minP .
-      ?resource cams:maxTransmitPowerWatts ?maxP ;
-                cams:jammingBandwidthHz ?jamBw ;
-                cams:minOperatingFrequencyHz ?fMin ;
-                cams:maxOperatingFrequencyHz ?fMax .
-      ?threat cams:centerFrequencyHz ?fCenter ;
-              cams:emissionBandwidthHz ?emBw .
+           denied:countersThreat ?threat ;
+           denied:expectedStandoffMeters ?standoff ;
+           denied:minTransmitPowerWatts ?minP .
+      ?resource denied:maxTransmitPowerWatts ?maxP ;
+                denied:jammingBandwidthHz ?jamBw ;
+                denied:minOperatingFrequencyHz ?fMin ;
+                denied:maxOperatingFrequencyHz ?fMax .
+      ?threat denied:centerFrequencyHz ?fCenter ;
+              denied:emissionBandwidthHz ?emBw .
     }
     """
     rows = list(g.query(q))

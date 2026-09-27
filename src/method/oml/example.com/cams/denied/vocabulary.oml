@@ -1,0 +1,126 @@
+@dc:title "CAMS Denied-Environment Domain Vocabulary"
+@dc:description "Domain extension for denied-environment scenarios."
+vocabulary <https://example.com/cams/denied/vocabulary#> as denied {
+    extends <http://purl.org/dc/elements/1.1/> as dc
+    extends <http://www.w3.org/2001/XMLSchema#> as xsd
+    extends <https://example.com/cams/vocabulary#> as cams
+
+
+    @dc:description "Primary mission role class of an Asset in this scenario family."
+    scalar AssetKind [
+        oneOf "Recon", "Strike", "Jamming", "MultiRole"
+    ] = xsd:string
+
+    @dc:description "Primary role class of an Asset."
+    scalar property assetKind [
+        domain cams:Asset
+        range AssetKind
+        functional
+    ]
+
+    @dc:description "Horizontal pixel count of an imaging sensor."
+    scalar property horizontalPixelCount [
+        domain cams:SensorResource
+        range xsd:integer
+        functional
+    ]
+
+    @dc:description "Horizontal field of view in degrees."
+    scalar property horizontalFOVDegrees [
+        domain cams:SensorResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Peak compute throughput (TFLOPS)."
+    scalar property peakTeraflops [
+        domain cams:ComputeResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Keep-out radius around a hazard (meters)."
+    scalar property keepOutRadiusMeters [
+        domain cams:Hazard
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Cloud / weather ceiling (meters AGL)."
+    scalar property ceilingMeters [
+        domain cams:WeatherCondition
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Planner-assumed slant range (meters) from asset to observed object for this requirement."
+    scalar property expectedStandoffMeters [
+        domain cams:ResourceRequirement
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Maximum acceptable ground sample distance (meters/pixel) for the behavior to succeed with this sensor."
+    scalar property maxGroundSampleDistanceMeters [
+        domain cams:ResourceRequirement
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Minimum transmit power (Watts) the jammer must provide at the planned standoff."
+    scalar property minTransmitPowerWatts [
+        domain cams:ResourceRequirement
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Emitter center frequency (Hz)."
+    scalar property centerFrequencyHz [
+        domain cams:Threat
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Emitter occupied bandwidth (Hz)."
+    scalar property emissionBandwidthHz [
+        domain cams:Threat
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Maximum RF transmit power of a jammer/comm resource (W)."
+    scalar property maxTransmitPowerWatts [
+        domain cams:CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Instantaneous bandwidth the jammer can achieve (Hz)."
+    scalar property jammingBandwidthHz [
+        domain cams:CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Lower bound of jammer tunable frequency (Hz)."
+    scalar property minOperatingFrequencyHz [
+        domain cams:CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Upper bound of jammer tunable frequency (Hz)."
+    scalar property maxOperatingFrequencyHz [
+        domain cams:CommResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Jam (or similar) requirement is sized against a specific emitting Threat; frequency/bandwidth from that Threat."
+    relation countersThreat [
+        from cams:ResourceRequirement
+        to cams:Threat
+        reverse isCounteredBy
+        functional
+    ]
+}

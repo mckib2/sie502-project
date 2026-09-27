@@ -1,0 +1,7 @@
+@dc:title "CAMS Denied Domain Vocabulary Bundle"
+@dc:description "Core CAMS plus denied-environment domain vocabularies."
+vocabulary bundle <https://example.com/cams/denied/bundle#> as cams-denied-v-bundle {
+    includes <http://purl.org/dc/elements/1.1/> as dc
+    includes <https://example.com/cams/vocabulary#>
+    includes <https://example.com/cams/denied/vocabulary#>
+}

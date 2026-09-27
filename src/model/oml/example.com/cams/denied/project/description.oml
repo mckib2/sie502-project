@@ -1,9 +1,10 @@
-@dc:title "CAMS Description"
-@dc:description "Collaborative autonomy scenario."
-description <https://example.com/cams/project/description#> as cams-desc {
+@dc:title "CAMS Denied-Environment Description"
+@dc:description "Denied-environment ISR/strike/jam showcase ABox for the CAMS denied domain vocabulary."
+description <https://example.com/cams/denied/project/description#> as denied-desc {
     uses <http://purl.org/dc/elements/1.1/> as dc
     uses <http://www.w3.org/2001/XMLSchema#> as xsd
     uses <https://example.com/cams/vocabulary#> as cams
+    uses <https://example.com/cams/denied/vocabulary#> as denied
 
     instance Commander1 : cams:MissionCommander [
         cams:name "MyManTheCommander1"
@@ -176,7 +177,7 @@ description <https://example.com/cams/project/description#> as cams-desc {
 
     instance RQ23_Recon : cams:Asset [
         cams:name "RQ-23 Recon-1"
-        cams:assetKind "Recon"
+        denied:assetKind "Recon"
         cams:providesCapability CapSearch
         cams:providesCapability CapBDA
         cams:ownsResource SensorEOIR
@@ -186,7 +187,7 @@ description <https://example.com/cams/project/description#> as cams-desc {
 
     instance RQ23_Strike : cams:Asset [
         cams:name "RQ-23 Strike-1"
-        cams:assetKind "Strike"
+        denied:assetKind "Strike"
         cams:providesCapability CapStrike
         cams:ownsResource ComputeStrike
         cams:ownsResource CommStrike
@@ -194,32 +195,32 @@ description <https://example.com/cams/project/description#> as cams-desc {
 
     instance Altius_Jam : cams:Asset [
         cams:name "Altius Jammer-1"
-        cams:assetKind "Jamming"
+        denied:assetKind "Jamming"
         cams:providesCapability CapJam
         cams:ownsResource CommJam
     ]
 
     instance BravoRecon : cams:Asset [
         cams:name "Bravo Recon-Only"
-        cams:assetKind "Recon"
+        denied:assetKind "Recon"
         cams:providesCapability CapSearch
         cams:ownsResource SensorBravo
     ]
 
     instance SensorEOIR : cams:SensorResource [
         cams:name "Shared EO/IR pod"
-        cams:horizontalPixelCount "3840"^^xsd:integer // NBPM: these aren't real values, I just made them up to look plausible
-        cams:horizontalFOVDegrees "20.0"^^xsd:decimal
+        denied:horizontalPixelCount "3840"^^xsd:integer // NBPM: these aren't real values, I just made them up to look plausible
+        denied:horizontalFOVDegrees "20.0"^^xsd:decimal
     ]
 
     instance ComputeRecon : cams:ComputeResource [
         cams:name "Recon onboard compute"
-        cams:peakTeraflops "2.0"^^xsd:decimal
+        denied:peakTeraflops "2.0"^^xsd:decimal
     ]
 
     instance ComputeStrike : cams:ComputeResource [
         cams:name "Strike onboard compute"
-        cams:peakTeraflops "4.0"^^xsd:decimal
+        denied:peakTeraflops "4.0"^^xsd:decimal
     ]
 
     instance CommStrike : cams:CommResource [
@@ -228,16 +229,16 @@ description <https://example.com/cams/project/description#> as cams-desc {
 
     instance CommJam : cams:CommResource [
         cams:name "Altius RF jammer"
-        cams:maxTransmitPowerWatts "100.0"^^xsd:decimal
-        cams:jammingBandwidthHz "2.0e7"^^xsd:decimal
-        cams:minOperatingFrequencyHz "2.0e9"^^xsd:decimal
-        cams:maxOperatingFrequencyHz "6.0e9"^^xsd:decimal
+        denied:maxTransmitPowerWatts "100.0"^^xsd:decimal
+        denied:jammingBandwidthHz "2.0e7"^^xsd:decimal
+        denied:minOperatingFrequencyHz "2.0e9"^^xsd:decimal
+        denied:maxOperatingFrequencyHz "6.0e9"^^xsd:decimal
     ]
 
     instance SensorBravo : cams:SensorResource [
         cams:name "Bravo EO sensor"
-        cams:horizontalPixelCount "1920"^^xsd:integer
-        cams:horizontalFOVDegrees "40.0"^^xsd:decimal
+        denied:horizontalPixelCount "1920"^^xsd:integer
+        denied:horizontalFOVDegrees "40.0"^^xsd:decimal
     ]
 
     // ----- Behaviors -----
@@ -270,8 +271,8 @@ description <https://example.com/cams/project/description#> as cams-desc {
     relation instance BDA_Needs_EOIR : cams:ResourceRequirement [
         from BehBDA
         to SensorEOIR
-        cams:expectedStandoffMeters "4000"^^xsd:decimal // NBPM: it's a bummer to me that I can't figure out how to "generate" this from reasoning or some other language, so I hard-code
-        cams:maxGroundSampleDistanceMeters "0.5"^^xsd:decimal
+        denied:expectedStandoffMeters "4000"^^xsd:decimal // NBPM: it's a bummer to me that I can't figure out how to "generate" this from reasoning or some other language, so I hard-code
+        denied:maxGroundSampleDistanceMeters "0.5"^^xsd:decimal
     ]
 
     instance BehJam : cams:Behavior [
@@ -283,9 +284,9 @@ description <https://example.com/cams/project/description#> as cams-desc {
     relation instance Jam_Needs_Comm : cams:ResourceRequirement [
         from BehJam
         to CommJam
-        cams:expectedStandoffMeters "8000"^^xsd:decimal
-        cams:minTransmitPowerWatts "50.0"^^xsd:decimal
-        cams:countersThreat ThreatEmitter42
+        denied:expectedStandoffMeters "8000"^^xsd:decimal
+        denied:minTransmitPowerWatts "50.0"^^xsd:decimal
+        denied:countersThreat ThreatEmitter42
     ]
 
     instance BehLoiter : cams:Behavior [
@@ -325,18 +326,18 @@ description <https://example.com/cams/project/description#> as cams-desc {
 
     instance ThreatEmitter42 : cams:Threat [
         cams:name "Emitter-42"
-        cams:centerFrequencyHz "3.2e9"^^xsd:decimal
-        cams:emissionBandwidthHz "5.0e6"^^xsd:decimal
+        denied:centerFrequencyHz "3.2e9"^^xsd:decimal
+        denied:emissionBandwidthHz "5.0e6"^^xsd:decimal
     ]
 
     instance HazardSAM : cams:Hazard [
         cams:name "SAM envelope north"
-        cams:keepOutRadiusMeters "15000"^^xsd:decimal
+        denied:keepOutRadiusMeters "15000"^^xsd:decimal
     ]
 
     instance WeatherClear : cams:WeatherCondition [
         cams:name "Clear with intermittent ceiling"
-        cams:ceilingMeters "1200"^^xsd:decimal
+        denied:ceilingMeters "1200"^^xsd:decimal
     ]
 
     instance TeamAlphaSA : cams:SituationalAwareness [
