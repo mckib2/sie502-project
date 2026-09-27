@@ -19,8 +19,8 @@ src/method/oml/example.com/cams/
   bundle.oml
   denied/                     # denied domain TBox
 src/method/md/example.com/cams/
-  authority.md mission.md engagement.md platform.md   # compose templates + SHACL
-src/model/md/CAMS Denied/     # compose pages (viewpoint UI)
+  authority.md mission.md engagement.md platform.md coverage.md
+src/model/md/CAMS Denied/     # compose pages (Authority, Mission, Engagement, Platform, Coverage)
 src/model/oml/example.com/cams/denied/project/
   description.oml             # scenario ABox
   bundle.oml
@@ -78,7 +78,7 @@ Current set of acceptance queries (expanded since initial project proposal):
 
 Authority: MissionCommander, Intent, Constraint, Condition
 Plans: Objective, MissionPlan, EngagementPlan, Behavior, OPM (Objective Plan Model) (contains Roles), Role
-Platform: Asset, Team, Capability, Resource (+ Sensor/Compute/Comm)
+Platform: Asset, Team, Capability, Resource (+ Imaging/Radar Sensor, Compute, Comm); Coverage compose matrices (Objectives x OPMs, OPMs x Assets)
 World: WorldState, PredictedWorldState, facets (`AssetState` with `readinessStatus`), SituationalAwareness, WorldStateDelta
 Probability of Success (PoS): SuccessProbabilityEstimator, OPMSuccessEstimate, MissionAssessment, ReplanAction, CommanderNotice
 

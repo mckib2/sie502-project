@@ -31,6 +31,10 @@ Commander intents and constraints.
 - Constraint must comprise at least one Condition.
 - Condition should carry a satisfaction status for monitoring.
 
+### Commanders
+
+Who expresses intents (read-only).
+
 ```table-editor
 ---
 columns: { this: { label: "Commander" } }
@@ -60,6 +64,10 @@ cams:MissionCommanderShape
     ] ;
     .
 ```
+
+### Intents
+
+Commander goals: priority, constraints, and spawned objectives.
 
 ```table-editor
 ---
@@ -114,6 +122,10 @@ cams:IntentShape
     .
 ```
 
+### Constraints
+
+Conjunction gates: each lists Conditions and a satisfaction status.
+
 ```table-editor
 ---
 columns: { this: { label: "Constraint" } }
@@ -153,6 +165,10 @@ cams:ConstraintShape
     ] ;
     .
 ```
+
+### Conditions
+
+Atomic predicates evaluated against world/SA context.
 
 ```table-editor
 ---

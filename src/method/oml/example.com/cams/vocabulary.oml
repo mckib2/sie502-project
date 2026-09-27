@@ -35,7 +35,6 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
         oneOf "Available", "Busy"
     ] = xsd:string
 
-
     @dc:description "Anything with a human-readable name."
     aspect Identified
 
@@ -109,11 +108,35 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
     @dc:description "Sensing platform resource."
     concept SensorResource < Resource
 
+    @dc:description "Imaging (EO/IR) sensor; pixel count and FOV live in domain vocabularies."
+    concept ImagingSensorResource < SensorResource
+
+    @dc:description "Radar sensor; range/frequency scalars live in domain vocabularies."
+    concept RadarSensorResource < SensorResource
+
     @dc:description "Onboard compute platform resource."
     concept ComputeResource < Resource
 
     @dc:description "Communications platform resource."
     concept CommResource < Resource
+
+    @dc:description "Selectable type-level resource need in requiresResource (not owned hardware). ABox tokens are named like the class they stand for (e.g. ImagingSensorResource)."
+    concept ResourceTypeToken < Resource
+
+    @dc:description "Token: any SensorResource (imaging or radar) satisfies."
+    concept SensorResourceToken < ResourceTypeToken
+
+    @dc:description "Token: any ImagingSensorResource satisfies."
+    concept ImagingSensorResourceToken < ResourceTypeToken
+
+    @dc:description "Token: any RadarSensorResource satisfies."
+    concept RadarSensorResourceToken < ResourceTypeToken
+
+    @dc:description "Token: any ComputeResource satisfies."
+    concept ComputeResourceToken < ResourceTypeToken
+
+    @dc:description "Token: any CommResource satisfies."
+    concept CommResourceToken < ResourceTypeToken
 
 
     @dc:description "Snapshot of the operational world (ground truth or predicted)."
@@ -678,7 +701,55 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
         -> sharesResource(consumer, r)
     ]
 
-    @dc:description "Owned resource is Busy/occupied when the owning asset isExecuting an OPM and fills a Role whose behavior requires it."
+    @dc:description "SensorResourceToken need: share any SensorResource owned by another team member."
+    rule ResourceSharingByTypeSensor [
+        contains(opm, role) &
+        allocatedTo(role, consumer) &
+        realizesBehavior(role, b) &
+        requiresResource(b, token) &
+        SensorResourceToken(token) &
+        ownsResource(owner, r) &
+        SensorResource(r) &
+        differentFrom(consumer, owner) &
+        includesMember(team, consumer) &
+        includesMember(team, owner) &
+        OPM(opm) & Role(role) & Behavior(b) & ResourceTypeToken(token) & Resource(r) & Asset(consumer) & Asset(owner) & Team(team)
+        -> sharesResource(consumer, r)
+    ]
+
+    @dc:description "ImagingSensorResourceToken need: share any ImagingSensorResource owned by another team member."
+    rule ResourceSharingByTypeImaging [
+        contains(opm, role) &
+        allocatedTo(role, consumer) &
+        realizesBehavior(role, b) &
+        requiresResource(b, token) &
+        ImagingSensorResourceToken(token) &
+        ownsResource(owner, r) &
+        ImagingSensorResource(r) &
+        differentFrom(consumer, owner) &
+        includesMember(team, consumer) &
+        includesMember(team, owner) &
+        OPM(opm) & Role(role) & Behavior(b) & ResourceTypeToken(token) & Resource(r) & Asset(consumer) & Asset(owner) & Team(team)
+        -> sharesResource(consumer, r)
+    ]
+
+    @dc:description "RadarSensorResourceToken need: share any RadarSensorResource owned by another team member."
+    rule ResourceSharingByTypeRadar [
+        contains(opm, role) &
+        allocatedTo(role, consumer) &
+        realizesBehavior(role, b) &
+        requiresResource(b, token) &
+        RadarSensorResourceToken(token) &
+        ownsResource(owner, r) &
+        RadarSensorResource(r) &
+        differentFrom(consumer, owner) &
+        includesMember(team, consumer) &
+        includesMember(team, owner) &
+        OPM(opm) & Role(role) & Behavior(b) & ResourceTypeToken(token) & Resource(r) & Asset(consumer) & Asset(owner) & Team(team)
+        -> sharesResource(consumer, r)
+    ]
+
+    @dc:description "Owned resource is Busy/occupied when the owning asset isExecuting an OPM and fills a Role whose behavior requires that specific resource (not a type token)."
     rule ResourceOccupiedOwned [
         isExecuting(asset, opm) &
         contains(opm, role) &
@@ -687,6 +758,48 @@ vocabulary <https://example.com/cams/vocabulary#> as cams {
         requiresResource(b, r) &
         ownsResource(asset, r) &
         Asset(asset) & OPM(opm) & Role(role) & Behavior(b) & Resource(r)
+        -> isOccupiedBy(r, opm) & availabilityStatus(r, "Busy")
+    ]
+
+    @dc:description "Owned SensorResource Busy when behavior requires a SensorResourceToken."
+    rule ResourceOccupiedOwnedByTypeSensor [
+        isExecuting(asset, opm) &
+        contains(opm, role) &
+        allocatedTo(role, asset) &
+        realizesBehavior(role, b) &
+        requiresResource(b, token) &
+        SensorResourceToken(token) &
+        ownsResource(asset, r) &
+        SensorResource(r) &
+        Asset(asset) & OPM(opm) & Role(role) & Behavior(b) & ResourceTypeToken(token) & Resource(r)
+        -> isOccupiedBy(r, opm) & availabilityStatus(r, "Busy")
+    ]
+
+    @dc:description "Owned ImagingSensorResource Busy when behavior requires an ImagingSensorResourceToken."
+    rule ResourceOccupiedOwnedByTypeImaging [
+        isExecuting(asset, opm) &
+        contains(opm, role) &
+        allocatedTo(role, asset) &
+        realizesBehavior(role, b) &
+        requiresResource(b, token) &
+        ImagingSensorResourceToken(token) &
+        ownsResource(asset, r) &
+        ImagingSensorResource(r) &
+        Asset(asset) & OPM(opm) & Role(role) & Behavior(b) & ResourceTypeToken(token) & Resource(r)
+        -> isOccupiedBy(r, opm) & availabilityStatus(r, "Busy")
+    ]
+
+    @dc:description "Owned RadarSensorResource Busy when behavior requires a RadarSensorResourceToken."
+    rule ResourceOccupiedOwnedByTypeRadar [
+        isExecuting(asset, opm) &
+        contains(opm, role) &
+        allocatedTo(role, asset) &
+        realizesBehavior(role, b) &
+        requiresResource(b, token) &
+        RadarSensorResourceToken(token) &
+        ownsResource(asset, r) &
+        RadarSensorResource(r) &
+        Asset(asset) & OPM(opm) & Role(role) & Behavior(b) & ResourceTypeToken(token) & Resource(r)
         -> isOccupiedBy(r, opm) & availabilityStatus(r, "Busy")
     ]
 

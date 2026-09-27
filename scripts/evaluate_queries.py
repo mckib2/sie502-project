@@ -284,13 +284,31 @@ def check_resource_occupancy(g: Graph) -> None:
     print("\n=== Resource occupancy (executing OPM Role -> Busy resource) ===")
     q = """
     PREFIX cams: <https://example.com/cams/vocabulary#>
-    SELECT ?asset ?opm ?role ?resource ?status
+    SELECT DISTINCT ?asset ?opm ?role ?resource ?status
     WHERE {
       ?asset cams:isExecuting ?opm .
       ?opm cams:contains ?role .
       ?role cams:allocatedTo ?asset ;
            cams:realizesBehavior ?b .
-      ?b cams:requiresResource ?resource .
+      {
+        ?b cams:requiresResource ?need .
+        FILTER NOT EXISTS { ?need a cams:ResourceTypeToken }
+        BIND(?need AS ?resource)
+      }
+      UNION
+      {
+        ?b cams:requiresResource ?need .
+        ?need a cams:ResourceTypeToken .
+        ?asset cams:ownsResource|cams:sharesResource ?resource .
+        FILTER(?resource != ?need)
+        FILTER(
+          (EXISTS { ?need a cams:SensorResourceToken } && EXISTS { ?resource a cams:SensorResource }) ||
+          (EXISTS { ?need a cams:ImagingSensorResourceToken } && EXISTS { ?resource a cams:ImagingSensorResource }) ||
+          (EXISTS { ?need a cams:RadarSensorResourceToken } && EXISTS { ?resource a cams:RadarSensorResource }) ||
+          (EXISTS { ?need a cams:ComputeResourceToken } && EXISTS { ?resource a cams:ComputeResource }) ||
+          (EXISTS { ?need a cams:CommResourceToken } && EXISTS { ?resource a cams:CommResource })
+        )
+      }
       OPTIONAL { ?resource cams:availabilityStatus ?status }
       OPTIONAL { ?resource cams:isOccupiedBy ?occ }
       FILTER(!BOUND(?occ) || ?occ = ?opm)

@@ -29,6 +29,10 @@ What the mission aims to achieve.  Note, this is "what", importantly not "how".
 - Objective must have exactly one Constraint.
 - Mission may assign at most one Team.
 
+### Missions
+
+Top-level plan: intents, objectives, and assigned team.
+
 ```table-editor
 ---
 columns: { this: { label: "Mission" } }
@@ -72,6 +76,10 @@ cams:MissionPlanShape
     ] ;
     .
 ```
+
+### Objectives
+
+Measurable goals: PoS threshold, activation constraint, and order.
 
 ```table-editor
 ---

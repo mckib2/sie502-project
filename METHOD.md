@@ -15,9 +15,10 @@ The denied-environment scenario is an example of a specific domain (`denied`) th
 | Authority | Who / why | MissionCommander, Intent, Constraint, Condition | table |
 | Mission | What | MissionPlan, Objective | table |
 | Engagement | How | EngagementPlan, OPM, Role | tree |
-| Platform | With what | Team, Asset, Capability | table |
+| Platform | With what | Team, Asset, Capability, Behavior, Imaging/Radar sensors | table |
+| Coverage | Fit | Objective x OPM; OPM x Asset (allocated vs able) | matrix |
 
-World-state, estimators, and assessments are provided in a supporting `world` description.  They are context from engagements and missions.
+World-state, estimators, and assessments stay in the shared description as context.
 
 ### Notes
 

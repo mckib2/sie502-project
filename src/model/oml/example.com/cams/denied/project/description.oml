@@ -137,7 +137,7 @@ description <https://example.com/cams/denied/project/description#> as denied-des
     instance ObjLoiterConstraint : cams:Constraint [
         cams:name "Loiter only in clear weather and safe zone"
         cams:comprisesCondition CondLoiterWeather, CondLoiterSafe
-        cams:satisfactionStatus "Satisfied"
+        cams:satisfactionStatus "Unsatisfied"
     ]
 
     instance CondLoiterWeather : cams:Condition [
@@ -182,11 +182,16 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:name "RF jamming"
     ]
 
+    instance CapLoiter : cams:Capability [
+        cams:name "Loiter on station"
+    ]
+
     instance RQ23_Recon : cams:Asset [
         cams:name "RQ-23 Recon-1"
         denied:assetKind "Recon"
         cams:providesCapability CapSearch
         cams:providesCapability CapBDA
+        cams:providesCapability CapLoiter
         cams:ownsResource SensorEOIR
         cams:ownsResource ComputeRecon
         cams:isExecuting OPM_Search
@@ -214,7 +219,27 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:ownsResource SensorBravo
     ]
 
-    instance SensorEOIR : cams:SensorResource [
+    instance SensorResource : cams:SensorResourceToken [
+        cams:name "SensorResource"
+    ]
+
+    instance ImagingSensorResource : cams:ImagingSensorResourceToken [
+        cams:name "ImagingSensorResource"
+    ]
+
+    instance RadarSensorResource : cams:RadarSensorResourceToken [
+        cams:name "RadarSensorResource"
+    ]
+
+    instance ComputeResource : cams:ComputeResourceToken [
+        cams:name "ComputeResource"
+    ]
+
+    instance CommResource : cams:CommResourceToken [
+        cams:name "CommResource"
+    ]
+
+    instance SensorEOIR : cams:ImagingSensorResource [
         cams:name "Shared EO/IR pod"
         denied:horizontalPixelCount "3840"^^xsd:integer
         denied:horizontalFOVDegrees "20.0"^^xsd:decimal
@@ -242,34 +267,35 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         denied:maxOperatingFrequencyHz "6.0e9"^^xsd:decimal
     ]
 
-    instance SensorBravo : cams:SensorResource [
+    instance SensorBravo : cams:ImagingSensorResource [
         cams:name "Bravo EO sensor"
         denied:horizontalPixelCount "1920"^^xsd:integer
         denied:horizontalFOVDegrees "40.0"^^xsd:decimal
     ]
 
     instance BehSearch : cams:Behavior [
-        cams:name "CoordinatedSearch"
+        cams:name "Search"
         cams:requiresCapability CapSearch
-        cams:requiresResource SensorEOIR
+        cams:requiresResource SensorResource
     ]
 
     instance BehBravoSearch : cams:Behavior [
-        cams:name "BravoLocalSearch"
+        cams:name "LocalSearch"
         cams:requiresCapability CapSearch
         cams:requiresResource SensorBravo
     ]
 
     instance BehStrike : cams:Behavior [
-        cams:name "FormationStrike"
+        cams:name "Strike"
         cams:requiresCapability CapStrike
         cams:requiresResource ComputeStrike
-        cams:requiresResource SensorEOIR
+        cams:requiresResource SensorResource
     ]
 
     instance BehBDA : cams:Behavior [
-        cams:name "BattleDamageAssessment"
+        cams:name "BDA"
         cams:requiresCapability CapBDA
+        cams:requiresResource SensorEOIR
     ]
 
     relation instance BDA_Needs_EOIR : cams:ResourceRequirement [
@@ -280,8 +306,9 @@ description <https://example.com/cams/denied/project/description#> as denied-des
     ]
 
     instance BehJam : cams:Behavior [
-        cams:name "SupportJamming"
+        cams:name "Jamming"
         cams:requiresCapability CapJam
+        cams:requiresResource CommJam
     ]
 
     relation instance Jam_Needs_Comm : cams:ResourceRequirement [
@@ -293,8 +320,8 @@ description <https://example.com/cams/denied/project/description#> as denied-des
     ]
 
     instance BehLoiter : cams:Behavior [
-        cams:name "LoiterAtPoint"
-        cams:requiresCapability CapSearch
+        cams:name "Loiter"
+        cams:requiresCapability CapLoiter
     ]
 
     instance WS_GT : cams:WorldState [

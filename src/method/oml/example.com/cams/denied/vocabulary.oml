@@ -20,14 +20,28 @@ vocabulary <https://example.com/cams/denied/vocabulary#> as denied {
 
     @dc:description "Horizontal pixel count of an imaging sensor."
     scalar property horizontalPixelCount [
-        domain cams:SensorResource
+        domain cams:ImagingSensorResource
         range xsd:integer
         functional
     ]
 
     @dc:description "Horizontal field of view in degrees."
     scalar property horizontalFOVDegrees [
-        domain cams:SensorResource
+        domain cams:ImagingSensorResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Maximum useful detection range of a radar sensor (meters)."
+    scalar property maxDetectionRangeMeters [
+        domain cams:RadarSensorResource
+        range xsd:decimal
+        functional
+    ]
+
+    @dc:description "Radar operating center frequency (Hz)."
+    scalar property operatingFrequencyHz [
+        domain cams:RadarSensorResource
         range xsd:decimal
         functional
     ]
