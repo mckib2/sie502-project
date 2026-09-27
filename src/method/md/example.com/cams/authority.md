@@ -16,6 +16,8 @@ template:
 
 Commander intents and constraints.
 
+This viewpoint specifies spawn/activation constraints that are upstream of every play: if the Intent or Objective gate is wrong, Engagement and Platform edits cannot fix mission meaning. Tables are used as commanders, intents, and conditions are catalogs, not nested plays.
+
 ## Focal types
 
 | Type | Role |

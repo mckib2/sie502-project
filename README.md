@@ -29,7 +29,8 @@ scripts/evaluate_queries.py
 scripts/sync_shapes_from_md.py
 ```
 
-See [METHOD.md](METHOD.md) for patterns and business rules.
+See [METHOD.md](METHOD.md) for the methodology narrative (rationale, alternatives, uncertainty, open issues) and business rules.
+"Dogfood" via compose pages under `src/model/md/CAMS Denied/` (Authority --> Mission --> Engagement --> Platform --> Coverage) against ontology `https://example.com/cams/denied/project/description`.
 Refresh shapes after editing pattern md: `python scripts/sync_shapes_from_md.py`.
 
 Start the OML server from the CLI (preferred when not using the VS Code extension):

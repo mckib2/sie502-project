@@ -14,7 +14,9 @@ template:
 
 # Mission & Objectives
 
-What the mission aims to achieve.  Note, this is "what", importantly not "how".
+What the mission aims to achieve.
+
+Kept separate from Engagement so "what success looks like" (Objectives, thresholds, precedence) is intentionally kept separate from OPM/Role allocation.  A mission may list alternate-team concerns via assigned Team, but how that team fills Roles is the responsibility of Engagement.   Tables are used as MissionPlan and Objective are shallow compared to Engagement --> OPM --> Role.
 
 ## Focal types
 
