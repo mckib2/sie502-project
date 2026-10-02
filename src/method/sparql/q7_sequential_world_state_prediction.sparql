@@ -1,0 +1,13 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Q7: Sequential world-state prediction: successor of OPM_i should be input of OPM_i+1
+SELECT ?opm1 ?opm2 ?successor ?input ?ok
+WHERE {
+  ?opm1 a cams:OPM ;
+        cams:precedes ?opm2 ;
+        cams:predictsSuccessor ?successor .
+  ?opm2 a cams:OPM .
+  OPTIONAL { ?opm2 cams:startsFrom ?input }
+  BIND(IF(BOUND(?input) && ?input = ?successor, "chain-ok", "chain-break") AS ?ok)
+}
+ORDER BY ?successor

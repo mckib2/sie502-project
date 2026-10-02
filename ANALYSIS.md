@@ -40,6 +40,50 @@ Finding: Allocated Roles resolve resource needs via owns/shares (including takin
 
 ---
 
+## Q5. Can concurrent execution lead to resource contention?
+
+Evidence: `src/method/sparql/q5_resource_contention.sparql`; Dashboard Q5 table; occupancy checks in `scripts/evaluate_queries.py`.
+
+Finding: No contention under nominal execution (only `OPM_Search` executing on `RQ23_Recon`).  Resource reservation is modeled: SWRL `ResourceOccupied*` rules derive `isOccupiedBy` and `availabilityStatus = Busy` when an asset is executing an OPM whose Role requires that resource.  The `check_resource_occupancy` function in `evaluate_queries.py` validates that executing Role resources are correctly marked occupied.
+
+Diagnosed gap (Outside the model): Runtime time-slot scheduling, priority preemption, and real-time resource arbitration are platform-runtime concerns.  The CAMS model checks static allocation feasibility and instantaneous occupancy, but does not model temporal overlap or queueing.
+
+---
+
+## Q6. How does mission assessment monitor probability of success and trigger contingency responses?
+
+Evidence: `src/method/sparql/q6_success_probability_monitor.sparql`; Dashboard Q6 table; `src/method/sparql/pos_inputs.sparql`; scripted PoS cards in Dashboard; `scripts/evaluate_queries.py` (`check_pos_product`).
+
+Finding: `AssessmentAlphaFeasible` monitors `MissionDeny1` with baseline serial PoS ≈ 0.757 (Search 0.90 × Strike 0.99 × BDA 0.85).  All per-objective thresholds are met.  The assessment triggers `ReplanAfterSpawn`.  `AssessmentInfeasible` on EngagementBravo (PoS 0.70 for search-only) triggers `NoticeMissionImpossible`, which SWRL `KickbackAddressing` addresses to `Commander1`.
+
+Including candidate/alternate OPMs (AlphaWideSearch, RadarSearch, StrikeSolo, ReconStrike) yields an ensemble PoS of ~0.849 -- this upper bound shows redundancy margin from alternate plays.
+
+Diagnosed gap (Process / Tooling): Non-linear PoS arithmetic (parallel-then-serial composition) requires script-based computation.  The vocabulary supplies the inputs (per-OPM estimates, per-Objective thresholds), but the formula `P(Obj) = 1-∏(1-p)` and `P(Mission) = ∏ P(Obj)` lives in Python, not in SPARQL or SWRL.
+
+---
+
+## Q7. Does the mission plan maintain sequential world-state prediction continuity?
+
+Evidence: `src/method/sparql/q7_sequential_world_state_prediction.sparql`; Dashboard Q7 table; `scripts/evaluate_queries.py` (`check_state_chain`).
+
+Finding: Topological continuity is maintained: `OPM_Search` predicts successor `WS1`, `OPM_JamAndStrike` starts from `WS1` (chain-ok).  `OPM_JamAndStrike` predicts `WS2`, `OPM_BDA` starts from `WS2` (chain-ok).  The SWRL `StateChain` rule can derive `startsFrom` from `predictsSuccessor` + `precedes` when not manually asserted.
+
+Diagnosed gap (Outside the model): Continuous physical state estimation (Kalman filtering, sensor fusion) and world-state delta semantics (what changed between `WS1` and `WS2`) are outside the scope of this management ontology.  `WorldState` and `PredictedWorldState` are opaque tokens representing planning context, not physical simulators.
+
+---
+
+## Q8. How do operational and environmental conditions gate Intent and Objective activation?
+
+Evidence: `src/method/sparql/q8_constraint_condition_gating.sparql`; Dashboard Q8 table; `scripts/evaluate_queries.py` (`check_constraint_rollup`).
+
+Finding: Conjunction gating is fully demonstrated.  Active: `IntentFindFix` has `IntentFindFixConstraint` (Satisfied, 1/1 conditions met) → spawns `ObjSearch`, `ObjBDA`.  `IntentNeutralize` has `IntentNeutralizeConstraint` (Satisfied, 2/2 conditions: `CondThreatPresent` + `CondThreatNear`) → spawns `ObjStrike`.  Inactive: `ObjInactiveLoiter` has `ObjLoiterConstraint` = Unsatisfied because `CondLoiterWeather` = Unsatisfied (1/2 conditions met → conjunction fails).
+
+SWRL rules `ConstraintUnsatisfied`, `ObjectiveActive`, `ObjectiveInactive`, `IntentActive`, `IntentInactive` derive these statuses from condition satisfaction.
+
+Diagnosed gap (Process): Temporal gate expiry (conditions becoming stale over time), condition re-evaluation triggers, and hysteresis are team process / runtime concerns.  The model captures a snapshot of condition satisfaction, not a continuous monitoring loop.
+
+---
+
 ## Pattern gap detection (orphans)
 
 One orphan / missing-relationship query per D4 pattern (`orphan_*.sparql`, composed in `analysis-bundle`):

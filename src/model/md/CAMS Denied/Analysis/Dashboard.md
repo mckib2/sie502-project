@@ -225,6 +225,162 @@ Allocated Roles resolve specific resources or type tokens (`owns` / `shares`). A
 
 ---
 
+### Q5. Can concurrent execution lead to resource contention?
+
+#### Evidence
+
+```table
+---
+stylesheet:
+  - selector: cell[col === "availability"]
+    style:
+      color: "#c0392b"
+      font-weight: bold
+---
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+SELECT ?resource ?opm1 ?role1 ?asset1 ?opm2 ?role2 ?asset2 ?availability
+WHERE {
+  ?asset1 cams:isExecuting ?opm1 .
+  ?asset2 cams:isExecuting ?opm2 .
+  ?opm1 cams:contains ?role1 .
+  ?opm2 cams:contains ?role2 .
+  ?role1 cams:allocatedTo ?asset1 ;
+         cams:realizesBehavior ?b1 .
+  ?role2 cams:allocatedTo ?asset2 ;
+         cams:realizesBehavior ?b2 .
+  ?b1 cams:requiresResource ?resource .
+  ?b2 cams:requiresResource ?resource .
+  OPTIONAL { ?resource cams:availabilityStatus ?availability }
+  FILTER(?role1 != ?role2)
+  FILTER(STR(?role1) < STR(?role2))
+}
+ORDER BY ?resource ?role1 ?role2
+```
+
+#### Interpretation
+
+Empty under nominal execution (only `OPM_Search` executing).  Resource reservation via `isOccupiedBy` + `Busy` status (SWRL `ResourceOccupied*` rules) guards against double-allocation.  Runtime time-slot scheduling and priority preemption are outside the model -- that is a platform-runtime concern.
+
+---
+
+### Q6. How does mission assessment monitor PoS and trigger contingency responses?
+
+#### Evidence
+
+```table
+---
+stylesheet:
+  - selector: cell[col === "response"]
+    style:
+      font-weight: bold
+---
+PREFIX cams: <https://example.com/cams/vocabulary#>
+PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?assessment ?composed ?response ?opm ?estimate ?prob ?objective ?threshold
+WHERE {
+  ?assessment a cams:MissionAssessment ;
+              cams:monitors ?mission ;
+              cams:composedSuccessProbability ?composed .
+  OPTIONAL { ?assessment cams:triggers ?response }
+  ?assessment cams:aggregates ?estimate .
+  ?estimate cams:estimatedSuccessProbability ?prob .
+  OPTIONAL {
+    ?est cams:yields ?estimate .
+    ?opm cams:usesEstimator ?est ;
+         cams:satisfies ?objective .
+    ?objective cams:activationStatus "Active" ;
+               cams:successProbabilityThreshold ?threshold .
+  }
+}
+ORDER BY ?assessment ?opm
+```
+
+#### Interpretation
+
+`AssessmentAlphaFeasible` (baseline PoS ~0.757) meets all thresholds and triggers `ReplanAfterSpawn`.  `AssessmentInfeasible` detects Bravo's missing strike capability and triggers `NoticeMissionImpossible`, addressed to `Commander1` via SWRL `KickbackAddressing`.  Non-linear PoS arithmetic (parallel-then-serial composition) requires the scripted computation below; the vocabulary provides the inputs (estimates, thresholds) but not the formula.
+
+---
+
+### Q7. Does the mission plan maintain sequential world-state continuity?
+
+#### Evidence
+
+```table
+---
+stylesheet:
+  - selector: cell[col === "ok"][value === "chain-break"]
+    style:
+      color: "#c0392b"
+      font-weight: bold
+---
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+SELECT ?opm1 ?opm2 ?successor ?input ?ok
+WHERE {
+  ?opm1 a cams:OPM ;
+        cams:precedes ?opm2 ;
+        cams:predictsSuccessor ?successor .
+  ?opm2 a cams:OPM .
+  OPTIONAL { ?opm2 cams:startsFrom ?input }
+  BIND(IF(BOUND(?input) && ?input = ?successor, "chain-ok", "chain-break") AS ?ok)
+}
+ORDER BY ?successor
+```
+
+#### Interpretation
+
+`OPM_Search` predicts `WS1`; `OPM_JamAndStrike` starts from `WS1` (chain-ok).  `OPM_JamAndStrike` predicts `WS2`; `OPM_BDA` starts from `WS2` (chain-ok).  The SWRL `StateChain` rule can derive `startsFrom` when not asserted.  Continuous physical state estimation (Kalman filters, etc.) is outside the model.
+
+---
+
+### Q8. How do operational and environmental conditions gate Intent and Objective activation?
+
+#### Evidence
+
+```table
+---
+stylesheet:
+  - selector: cell[col === "activation"][value === "Inactive"]
+    style:
+      color: "#c0392b"
+      font-weight: bold
+  - selector: cell[col === "condStatus"][value === "Unsatisfied"]
+    style:
+      color: "#c0392b"
+---
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+SELECT ?owner ?ownerType ?constraint ?cStatus ?condition ?condStatus ?activation ?spawned
+WHERE {
+  {
+    ?owner a cams:Intent ;
+           cams:isGatedBy ?constraint ;
+           cams:activationStatus ?activation .
+    BIND("Intent" AS ?ownerType)
+    OPTIONAL { ?owner cams:spawns ?spawned }
+  }
+  UNION
+  {
+    ?owner a cams:Objective ;
+           cams:isGatedBy ?constraint ;
+           cams:activationStatus ?activation .
+    BIND("Objective" AS ?ownerType)
+  }
+  ?constraint cams:satisfactionStatus ?cStatus ;
+              cams:comprisesCondition ?condition .
+  ?condition cams:satisfactionStatus ?condStatus .
+}
+ORDER BY ?ownerType ?owner ?condition
+```
+
+#### Interpretation
+
+Active spawn demonstrated: `IntentFindFix` constraint satisfied → spawns `ObjSearch`, `ObjBDA`.  `IntentNeutralize` both conditions (`CondThreatPresent`, `CondThreatNear`) satisfied → spawns `ObjStrike`.  Inactive gate: `ObjInactiveLoiter` has `ObjLoiterConstraint` = Unsatisfied because `CondLoiterWeather` = Unsatisfied (one unsatisfied condition makes the conjunction fail).  SWRL rules `ConstraintUnsatisfied`, `ObjectiveActive`, `ObjectiveInactive` derive these statuses.  Temporal gate expiry (e.g., conditions becoming stale) is a process/runtime concern not modeled.
+
+---
+
 ## 2. Computed analysis -- PoS composition
 
 Scripted parallel-then-serial Probability of Success over EngagementAlpha Active objectives (`pos_inputs.sparql` via adapter).

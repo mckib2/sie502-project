@@ -71,9 +71,10 @@ def local(term) -> str:
 def check_pos_product(g: Graph) -> None:
     print("\n=== PoS product check (Active objectives / EngagementAlpha) ===")
     # Estimates linked to Alpha OPMs that satisfy Active objectives
+    # Also determine which OPMs are baseline (on the precedes chain)
     q = """
     PREFIX cams: <https://example.com/cams/vocabulary#>
-    SELECT ?opm ?prob ?threshold ?objective
+    SELECT ?opm ?prob ?threshold ?objective ?isBaseline
     WHERE {
       <https://example.com/cams/denied/project/description#EngagementAlpha>
         cams:contains ?opm .
@@ -83,38 +84,66 @@ def check_pos_product(g: Graph) -> None:
       ?estimate cams:estimatedSuccessProbability ?prob .
       ?objective cams:activationStatus "Active" ;
                  cams:successProbabilityThreshold ?threshold .
+      BIND(EXISTS { ?opm cams:precedes ?_n } || EXISTS { ?_p cams:precedes ?opm } AS ?isBaseline)
     }
     ORDER BY ?opm
     """
     rows = list(g.query(q))
-    by_obj: dict[str, list[float]] = {}
+    # Collect all estimates, partitioned by baseline vs candidate
+    all_by_obj: dict[str, list[float]] = {}
+    baseline_by_obj: dict[str, list[float]] = {}
     thresholds: dict[str, float] = {}
-    for opm, prob, thr, obj in rows:
+    for opm, prob, thr, obj, is_baseline in rows:
         o = local(obj)
-        by_obj.setdefault(o, []).append(float(prob))
+        p = float(prob)
+        tag = "baseline" if is_baseline.toPython() else "candidate"
+        all_by_obj.setdefault(o, []).append(p)
+        if is_baseline.toPython():
+            baseline_by_obj.setdefault(o, []).append(p)
         thresholds[o] = float(thr)
-        print(f"  {local(opm)} -> {o}: p={prob} threshold={thr}")
-    print("  Per-objective parallel composed PoS (1 - prod(1-p)):")
-    composed_by_obj: dict[str, float] = {}
-    for o, probs in by_obj.items():
-        fail = 1.0
-        for p in probs:
-            fail *= 1.0 - p
-        composed = 1.0 - fail
-        composed_by_obj[o] = composed
-        thr = thresholds[o]
-        status = "MET" if composed >= thr else "UNMET"
-        print(f"    {o}: composed={composed:.4f} vs {thr} -> {status}")
+        print(f"  {local(opm)} -> {o}: p={prob} threshold={thr} ({tag})")
 
-    # Mission serial product of per-objective parallel compositions (Active Alpha chain)
-    if composed_by_obj:
+    def compose_pos(by_obj: dict[str, list[float]]) -> tuple[dict[str, float], float]:
+        composed: dict[str, float] = {}
+        for o in thresholds:
+            probs = by_obj.get(o, [])
+            if probs:
+                fail = 1.0
+                for p in probs:
+                    fail *= 1.0 - p
+                composed[o] = 1.0 - fail
+            # If no OPMs for this objective in this set, skip
         mission_p = 1.0
-        for o, p in composed_by_obj.items():
+        for p in composed.values():
             mission_p *= p
-        print(
-            f"  Mission serial product of objective PoS: "
-            f"{' × '.join(f'{p:.4f}' for p in composed_by_obj.values())} = {mission_p:.4f}"
-        )
+        return composed, mission_p
+
+    # Baseline PoS (precedes-chain OPMs only -- the committed serial plan)
+    baseline_composed, baseline_mission = compose_pos(baseline_by_obj)
+    print("  Baseline plan PoS (precedes-chain OPMs only):")
+    for o, p in baseline_composed.items():
+        thr = thresholds[o]
+        status = "MET" if p >= thr else "UNMET"
+        print(f"    {o}: composed={p:.4f} vs {thr} -> {status}")
+    print(
+        f"  Baseline mission serial PoS: "
+        f"{' × '.join(f'{p:.4f}' for p in baseline_composed.values())} = {baseline_mission:.4f}"
+    )
+
+    # Ensemble PoS (all OPMs including candidates)
+    all_composed, all_mission = compose_pos(all_by_obj)
+    print("  Ensemble PoS (all OPMs including candidates):")
+    for o, p in all_composed.items():
+        thr = thresholds[o]
+        status = "MET" if p >= thr else "UNMET"
+        print(f"    {o}: composed={p:.4f} vs {thr} -> {status}")
+    print(
+        f"  Ensemble mission serial PoS: "
+        f"{' × '.join(f'{p:.4f}' for p in all_composed.values())} = {all_mission:.4f}"
+    )
+
+    # Compare asserted assessment values against computed baseline
+    if baseline_composed:
         aq = """
         PREFIX cams: <https://example.com/cams/vocabulary#>
         SELECT ?assessment ?composed
@@ -128,10 +157,10 @@ def check_pos_product(g: Graph) -> None:
         """
         for assessment, asserted in g.query(aq):
             asserted_f = float(asserted)
-            ok = abs(mission_p - asserted_f) < 0.001
+            ok = abs(baseline_mission - asserted_f) < 0.001
             print(
                 f"    {local(assessment)}: asserted={asserted_f:.3f} "
-                f"computed={mission_p:.4f} -> {'OK' if ok else 'MISMATCH'}"
+                f"computed_baseline={baseline_mission:.4f} -> {'OK' if ok else 'MISMATCH'}"
             )
 
 

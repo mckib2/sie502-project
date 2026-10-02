@@ -29,7 +29,7 @@ World-state, estimators, and assessments stay in the shared description as conte
 
 ## Rationale
 
-Viewpoints follow the decision order a mission integrator will likely want: authority, then outcomes, then plays, then platforms, then "does this still cover?" Coverage is last (it'is diagnostic).
+Viewpoints follow the decision order a mission integrator will likely want: authority, then outcomes, then plays, then platforms, then "does this still cover?" Coverage is last (it is diagnostic).
 
 Engagement uses a tree because reusing a Role across OPMs is a easy-to-make mistake -- hierarchy makes this issue obvious.  Authority/Mission/Platform stay tables because their focal types are not nested the same way.
 
@@ -79,8 +79,8 @@ src/model/oml/.../denied/project/
   bundle.oml
 ```
 
-I decided to put everything in same descriptipon as cross-links (i.e., Intent --> Objective --> OPM --> Asset --> Team) tend to be dense and splitting into multiple description IRIs adds `uses` cycles without improving usability very much, AFAICT.  Viewpoint separation is achieved via the compose patterns/pages.
+I decided to put everything in same description as cross-links (i.e., Intent --> Objective --> OPM --> Asset --> Team) tend to be dense and splitting into multiple description IRIs adds `uses` cycles without improving usability very much, AFAICT.  Viewpoint separation is achieved via the compose patterns/pages.
 
 ## Analysis layer
 
-Methodology questions and gap detection are are found in [ANALYSIS.md](ANALYSIS.md) and the compose page `CAMS Denied/Analysis/Dashboard.md` (tables, Coverage matrix, OPM graph, scripted PoS).  Queries designed for find orphaned elements are found in the reusable template `https://example.com/cams/analysis-bundle`.
+Methodology questions and gap detection are found in [ANALYSIS.md](ANALYSIS.md) and the compose page `CAMS Denied/Analysis/Dashboard.md` (tables, Coverage matrix, OPM graph, scripted PoS).  Queries designed for find orphaned elements are found in the reusable template `https://example.com/cams/analysis-bundle`.
