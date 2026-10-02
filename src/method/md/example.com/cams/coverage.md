@@ -63,43 +63,38 @@ Allocated (`2`) vs capability-able but not allocated (`1`).
 ---
 rowColumnLabel: OPM / Asset
 stylesheet:
-  - selector: cell [Number(value) = 2]
+  - selector: cell [Number(value) == 2]
     style:
       background-color: "#5cb85c"
-  - selector: cell [Number(value) = 1]
+  - selector: cell [Number(value) == 1]
     style:
       background-color: "#d9edf7"
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
-SELECT ?row ?column (COALESCE(?n, 0) AS ?value)
+SELECT ?row ?column (MAX(?score) AS ?value)
 WHERE {
   ?row a cams:OPM .
   ?column a cams:Asset .
-
-  OPTIONAL {
-    SELECT ?row ?column (MAX(?score) AS ?n)
-    WHERE {
-      {
-        ?row cams:contains ?role .
-        ?role cams:allocatedTo ?column .
-        BIND(2 AS ?score)
-      }
-      UNION
-      {
-        ?row cams:contains ?role .
-        ?role cams:realizesBehavior ?beh .
-        FILTER NOT EXISTS { ?role cams:allocatedTo ?column }
-        FILTER EXISTS { ?beh cams:requiresCapability ?anyCap }
-        FILTER NOT EXISTS {
-          ?beh cams:requiresCapability ?cap .
-          FILTER NOT EXISTS { ?column cams:providesCapability ?cap }
-        }
-        BIND(1 AS ?score)
-      }
-    }
-    GROUP BY ?row ?column
+  {
+    BIND(0 AS ?score)
+  }
+  UNION
+  {
+    ?row cams:contains ?role .
+    ?role cams:realizesBehavior ?beh .
+    ?beh cams:requiresCapability ?cap .
+    ?column cams:providesCapability ?cap .
+    FILTER NOT EXISTS { ?role cams:allocatedTo ?column }
+    BIND(1 AS ?score)
+  }
+  UNION
+  {
+    ?row cams:contains ?role .
+    ?role cams:allocatedTo ?column .
+    BIND(2 AS ?score)
   }
 }
+GROUP BY ?row ?column
 ORDER BY ?row ?column
 ```
