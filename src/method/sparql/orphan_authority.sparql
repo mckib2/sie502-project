@@ -1,0 +1,20 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Authority orphans: Intent without gate; Constraint without Conditions
+SELECT ?element ?kind ?impact
+WHERE {
+  {
+    ?element a cams:Intent .
+    FILTER NOT EXISTS { ?element cams:isGatedBy ?c }
+    BIND("Intent" AS ?kind)
+    BIND("Intent has no spawn/activation Constraint" AS ?impact)
+  }
+  UNION
+  {
+    ?element a cams:Constraint .
+    FILTER NOT EXISTS { ?element cams:comprisesCondition ?cond }
+    BIND("Constraint" AS ?kind)
+    BIND("Constraint has zero Conditions (empty conjunction)" AS ?impact)
+  }
+}
+ORDER BY ?kind ?element

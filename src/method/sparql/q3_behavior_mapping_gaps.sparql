@@ -1,0 +1,38 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Q3: Behavior gaps: Role realization and allocation.
+SELECT ?behavior ?problem
+WHERE {
+  ?behavior a cams:Behavior .
+  {
+    FILTER NOT EXISTS { ?behavior cams:requiresCapability ?cap }
+    BIND("missing requiresCapability" AS ?problem)
+  }
+  UNION
+  {
+    FILTER NOT EXISTS { ?role cams:realizesBehavior ?behavior }
+    BIND("no Role realizes behavior" AS ?problem)
+  }
+  UNION
+  {
+    ?role cams:realizesBehavior ?behavior .
+    FILTER NOT EXISTS { ?role cams:allocatedTo ?asset }
+    BIND("Role missing allocatedTo" AS ?problem)
+  }
+  UNION
+  {
+    ?role cams:realizesBehavior ?behavior .
+    ?opm cams:contains ?role .
+    FILTER NOT EXISTS {
+      ?opm cams:satisfies ?obj .
+      ?obj cams:isSpawnedBy ?intent .
+    }
+    FILTER NOT EXISTS {
+      ?opm cams:satisfies ?obj2 .
+      ?plan cams:includesObjective ?obj2 ;
+           cams:includesIntent ?intent2 .
+    }
+    BIND("no path to Intent" AS ?problem)
+  }
+}
+ORDER BY ?behavior ?problem

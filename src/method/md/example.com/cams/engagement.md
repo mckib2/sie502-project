@@ -150,7 +150,7 @@ cams:RoleShape
         sh:order 3 ;
     ] ;
     sh:property [
-        sh:path cams:isContainedBy ;
+        sh:path [ sh:inversePath cams:contains ] ;
         sh:name "Owning OPM" ;
         sh:class cams:OPM ;
         sh:minCount 1 ;

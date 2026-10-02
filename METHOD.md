@@ -80,3 +80,7 @@ src/model/oml/.../denied/project/
 ```
 
 I decided to put everything in same descriptipon as cross-links (i.e., Intent --> Objective --> OPM --> Asset --> Team) tend to be dense and splitting into multiple description IRIs adds `uses` cycles without improving usability very much, AFAICT.  Viewpoint separation is achieved via the compose patterns/pages.
+
+## Analysis layer
+
+Methodology questions and gap detection are are found in [ANALYSIS.md](ANALYSIS.md) and the compose page `CAMS Denied/Analysis/Dashboard.md` (tables, Coverage matrix, OPM graph, scripted PoS).  Queries designed for find orphaned elements are found in the reusable template `https://example.com/cams/analysis-bundle`.

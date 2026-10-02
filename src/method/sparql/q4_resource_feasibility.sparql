@@ -1,0 +1,49 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+PREFIX denied: <https://example.com/cams/denied/vocabulary#>
+PREFIX oml: <http://opencaesar.io/oml#>
+
+# Q4: Required resources (specific individual or type token) accessible via Role allocation.
+SELECT ?opm ?role ?behavior ?need ?resource ?asset ?access ?standoffM ?maxGsdM ?pixels ?fovDeg
+WHERE {
+  ?opm a cams:OPM ;
+       cams:contains ?role .
+  ?role cams:realizesBehavior ?behavior ;
+        cams:allocatedTo ?asset .
+
+  {
+    ?behavior cams:requiresResource ?need .
+    FILTER NOT EXISTS { ?need a cams:ResourceTypeToken }
+    BIND(?need AS ?resource)
+  }
+  UNION
+  {
+    ?behavior cams:requiresResource ?need .
+    ?need a cams:ResourceTypeToken .
+    ?asset cams:ownsResource|cams:sharesResource ?resource .
+    FILTER(?resource != ?need)
+    FILTER(
+      (EXISTS { ?need a cams:SensorResourceToken } && EXISTS { ?resource a cams:SensorResource }) ||
+      (EXISTS { ?need a cams:ImagingSensorResourceToken } && EXISTS { ?resource a cams:ImagingSensorResource }) ||
+      (EXISTS { ?need a cams:RadarSensorResourceToken } && EXISTS { ?resource a cams:RadarSensorResource }) ||
+      (EXISTS { ?need a cams:ComputeResourceToken } && EXISTS { ?resource a cams:ComputeResource }) ||
+      (EXISTS { ?need a cams:CommResourceToken } && EXISTS { ?resource a cams:CommResource })
+    )
+  }
+
+  OPTIONAL { ?asset cams:ownsResource ?resource . BIND(true AS ?owns) }
+  OPTIONAL { ?asset cams:sharesResource ?resource . BIND(true AS ?shares) }
+  BIND(
+    IF(BOUND(?owns), "owns",
+      IF(BOUND(?shares), "shares", "none")) AS ?access
+  )
+  OPTIONAL {
+    ?req a cams:ResourceRequirement ;
+         oml:hasSource ?behavior ;
+         oml:hasTarget ?resource .
+    OPTIONAL { ?req denied:expectedStandoffMeters ?standoffM }
+    OPTIONAL { ?req denied:maxGroundSampleDistanceMeters ?maxGsdM }
+  }
+  OPTIONAL { ?resource denied:horizontalPixelCount ?pixels }
+  OPTIONAL { ?resource denied:horizontalFOVDegrees ?fovDeg }
+}
+ORDER BY ?opm ?role ?need ?resource

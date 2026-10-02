@@ -1,0 +1,28 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Platform orphans: Capability never provided; non-token Resource never owned; Asset not on Team
+SELECT ?element ?kind ?impact
+WHERE {
+  {
+    ?element a cams:Capability .
+    FILTER NOT EXISTS { ?asset cams:providesCapability ?element }
+    BIND("Capability" AS ?kind)
+    BIND("Capability never provided by any Asset" AS ?impact)
+  }
+  UNION
+  {
+    ?element a cams:Resource .
+    FILTER NOT EXISTS { ?element a cams:ResourceTypeToken }
+    FILTER NOT EXISTS { ?asset cams:ownsResource ?element }
+    BIND("Resource" AS ?kind)
+    BIND("Resource never owned by any Asset" AS ?impact)
+  }
+  UNION
+  {
+    ?element a cams:Asset .
+    FILTER NOT EXISTS { ?team cams:includesMember ?element }
+    BIND("Asset" AS ?kind)
+    BIND("Asset is not a member of any Team" AS ?impact)
+  }
+}
+ORDER BY ?kind ?element

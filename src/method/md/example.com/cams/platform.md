@@ -23,9 +23,9 @@ Teams, assets, and capabilities that fill engagement Roles. Domain-specific reso
 | `cams:Team` | Members and SA |
 | `cams:Asset` | Capabilities, owned resources |
 | `cams:Capability` | Catalog of abilities |
-| `cams:Behavior` | Requires capabilities/resources (or type tokens named like classes) |
+| `cams:Behavior` | Requires capabilities/resources |
 | `cams:ResourceTypeToken` | Class-level needs in Requires Resource (e.g. ImagingSensorResource) |
-| `cams:ResourceRequirement` | Reified Behavior→Resource need (+ denied scalars) |
+| `cams:ResourceRequirement` | Reified Behavior-->Resource need (+ denied scalars) |
 | `cams:ImagingSensorResource` | EO/IR; pixel/FOV |
 | `cams:RadarSensorResource` | Radar; range/frequency |
 
@@ -157,7 +157,7 @@ cams:CapabilityShape
 
 ### Behaviors
 
-Plays that Roles realize. **Requires Resource** accepts a specific pod (e.g. SensorEOIR) or a type token named like the class (e.g. ImagingSensorResource, SensorResource). Use **Resource requirements** for denied standoff/GSD/jam sizing.
+Plays that Roles realize. "Requires Resource" accepts a specific pod (e.g. SensorEOIR) or a type token named like the class (e.g. ImagingSensorResource, SensorResource). Use "Resource requirements" for denied standoff/GSD/jam sizing.
 
 ```table-editor
 ---
@@ -287,7 +287,7 @@ cams:RadarSensorResourceShape
 
 ### Resource requirements
 
-Reified Behavior→Resource links with denied standoff / GSD / jam sizing. These also appear under Behavior **Requires Resource** via the path union.
+Reified Behavior-->Resource links with denied standoff / GSD / jam sizing. These also appear under Behavior "Requires Resource" via the path union.
 
 ```table-editor
 ---

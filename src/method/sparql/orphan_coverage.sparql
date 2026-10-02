@@ -1,0 +1,17 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Coverage orphans: Active Objective with no OPM that satisfies it on any Engagement
+SELECT ?element ?kind ?impact
+WHERE {
+  ?element a cams:Objective ;
+           cams:activationStatus "Active" .
+  FILTER NOT EXISTS {
+    ?opm a cams:OPM ;
+         cams:satisfies ?element .
+    ?ep a cams:EngagementPlan ;
+        cams:contains ?opm .
+  }
+  BIND("Objective" AS ?kind)
+  BIND("Active Objective has no satisfying OPM on any Engagement" AS ?impact)
+}
+ORDER BY ?element

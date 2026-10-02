@@ -1,0 +1,27 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Engagement orphans: Role not in OPM; OPM not in Engagement; Behavior never realized
+SELECT ?element ?kind ?impact
+WHERE {
+  {
+    ?element a cams:Role .
+    FILTER NOT EXISTS { ?opm a cams:OPM ; cams:contains ?element }
+    BIND("Role" AS ?kind)
+    BIND("Role not contained by any OPM" AS ?impact)
+  }
+  UNION
+  {
+    ?element a cams:OPM .
+    FILTER NOT EXISTS { ?ep a cams:EngagementPlan ; cams:contains ?element }
+    BIND("OPM" AS ?kind)
+    BIND("OPM not contained by any EngagementPlan" AS ?impact)
+  }
+  UNION
+  {
+    ?element a cams:Behavior .
+    FILTER NOT EXISTS { ?role cams:realizesBehavior ?element }
+    BIND("Behavior" AS ?kind)
+    BIND("No Role realizes this Behavior (unused catalog entry)" AS ?impact)
+  }
+}
+ORDER BY ?kind ?element

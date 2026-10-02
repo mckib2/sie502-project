@@ -1,0 +1,21 @@
+PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Mission orphans: Objective not on any MissionPlan; Active Objective with no spawn Intent
+SELECT ?element ?kind ?impact
+WHERE {
+  {
+    ?element a cams:Objective .
+    FILTER NOT EXISTS { ?mission cams:includesObjective ?element }
+    BIND("Objective" AS ?kind)
+    BIND("Objective not included on any MissionPlan" AS ?impact)
+  }
+  UNION
+  {
+    ?element a cams:Objective ;
+             cams:activationStatus "Active" .
+    FILTER NOT EXISTS { ?intent cams:spawns ?element }
+    BIND("Objective" AS ?kind)
+    BIND("Active Objective has no spawning Intent" AS ?impact)
+  }
+}
+ORDER BY ?kind ?element
