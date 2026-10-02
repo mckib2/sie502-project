@@ -20,22 +20,25 @@ src/method/oml/example.com/cams/
   denied/                     # denied domain TBox
 src/method/md/example.com/cams/
   authority.md mission.md engagement.md platform.md coverage.md analysis-bundle.md
-src/method/sparql/            # analysis SPARQL (Dashboard + oml_adapter)
+src/method/sparql/            # canonical SPARQL queries (Dashboard + adapter + tests)
 src/method/py/oml_adapter.py
+src/model/md/index.md         # model root navigation entrypoint
 src/model/md/CAMS Denied/     # compose pages + Analysis/Dashboard.md
 ANALYSIS.md                   # Question -> evidence -> finding
 src/model/oml/example.com/cams/denied/project/
   description.oml             # scenario ABox
   bundle.oml
-queries/                      # SPARQL regression + shapes.ttl (auto-updated from md)
+queries/                      # SHACL shapes.ttl (auto-updated from pattern md)
 scripts/evaluate_queries.py
 scripts/sync_shapes_from_md.py
+scripts/sync_queries.py
 ```
 
 See [METHOD.md](METHOD.md) for the methodology narrative (rationale, alternatives, uncertainty, open issues) and business rules.
 See [ANALYSIS.md](ANALYSIS.md) for Module 1 Question --> Evidence --> Finding; live dashboard at `src/model/md/CAMS Denied/Analysis/Dashboard.md`.
 Dogfood via compose pages under `src/model/md/CAMS Denied/` (Authority --> Mission --> Engagement --> Platform --> Coverage --> Analysis) against ontology `https://example.com/cams/denied/project/description`.
 Refresh shapes after editing pattern md: `python scripts/sync_shapes_from_md.py`.
+Verify / sync SPARQL queries: `python scripts/sync_queries.py --check`.
 
 Start the OML server from the CLI (preferred when not using the VS Code extension):
 

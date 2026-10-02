@@ -1,15 +1,17 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
-# PoS inputs for EngagementAlpha: estimates on OPMs that satisfy Active objectives
-SELECT ?opm ?objective ?prob ?threshold
+# PoS inputs: estimates on OPMs satisfying Active objectives across all engagements
+SELECT ?ep ?opm ?objective ?prob ?threshold ?isBaseline
 WHERE {
-  <https://example.com/cams/denied/project/description#EngagementAlpha>
-    cams:contains ?opm .
+  ?ep a cams:EngagementPlan ;
+      cams:contains ?opm .
   ?opm cams:usesEstimator ?est ;
        cams:satisfies ?objective .
   ?est cams:yields ?estimate .
   ?estimate cams:estimatedSuccessProbability ?prob .
   ?objective cams:activationStatus "Active" ;
              cams:successProbabilityThreshold ?threshold .
+  BIND(EXISTS { ?opm cams:precedes ?_n } || EXISTS { ?_p cams:precedes ?opm } AS ?isBaseline)
 }
-ORDER BY ?objective ?opm
+ORDER BY ?ep ?objective ?opm
+

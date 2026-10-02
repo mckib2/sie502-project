@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Coverage orphans: Active Objective with no OPM that satisfies it on any Engagement
+
 SELECT ?element ?kind ?impact
 WHERE {
   ?element a cams:Objective ;

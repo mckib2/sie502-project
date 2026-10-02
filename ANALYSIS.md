@@ -1,6 +1,10 @@
 # CAMS Analysis
 
 Question --> evidence --> finding for methodology questions.
+
+> [!NOTE]
+> Scenario Context: While the CAMS methodology vocabulary and analysis queries are domain- and scenario-neutral, the specific findings, evidence traces, and diagnosed gaps documented below are tailored to the `CAMS Denied` operational scenario (MissionDeny1, TeamAlpha, TeamBravo) as specific evidence for the course project submission.
+
 ---
 
 ## Q1. Does a set of ordered behaviors satisfy an Intent?

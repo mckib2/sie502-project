@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Authority orphans: Intent without gate; Constraint without Conditions
+
 SELECT ?element ?kind ?impact
 WHERE {
   {

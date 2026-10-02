@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Q1: Active Intent + assigned-team engagement OPMs for active objectives (via Roles), with chronological sequence.
+
 SELECT ?intent ?objective ?opm ?role ?asset ?team ?nextObjective ?nextOpm
        (COUNT(DISTINCT ?predOpm) AS ?seq)
 WHERE {

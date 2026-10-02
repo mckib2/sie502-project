@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Platform orphans: Capability never provided; non-token Resource never owned; Asset not on Team
+
 SELECT ?element ?kind ?impact
 WHERE {
   {

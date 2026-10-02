@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Graph: OPM precedes chain (baseline serial plan)
+
 CONSTRUCT {
   ?opm cams:precedes ?next .
   ?opm a cams:OPM .

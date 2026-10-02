@@ -30,6 +30,8 @@ stylesheet:
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
+# Authority orphans: Intent without gate; Constraint without Conditions
+
 SELECT ?element ?kind ?impact
 WHERE {
   {
@@ -60,6 +62,8 @@ stylesheet:
       font-weight: bold
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Mission orphans: Objective not on any MissionPlan; Active Objective with no spawn Intent
 
 SELECT ?element ?kind ?impact
 WHERE {
@@ -92,6 +96,8 @@ stylesheet:
       font-weight: bold
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Engagement orphans: Role not in OPM; OPM not in Engagement; Behavior never realized
 
 SELECT ?element ?kind ?impact
 WHERE {
@@ -130,6 +136,8 @@ stylesheet:
       font-weight: bold
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Platform orphans: Capability never provided; non-token Resource never owned; Asset not on Team
 
 SELECT ?element ?kind ?impact
 WHERE {
@@ -170,6 +178,8 @@ stylesheet:
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
+# Coverage orphans: Active Objective with no OPM that satisfies it on any Engagement
+
 SELECT ?element ?kind ?impact
 WHERE {
   ?element a cams:Objective ;
@@ -203,6 +213,8 @@ stylesheet:
       color: white
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
+# Graph: OPM precedes chain (baseline serial plan)
 
 CONSTRUCT {
   ?opm cams:precedes ?next .

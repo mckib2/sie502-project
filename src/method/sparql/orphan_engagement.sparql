@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Engagement orphans: Role not in OPM; OPM not in Engagement; Behavior never realized
+
 SELECT ?element ?kind ?impact
 WHERE {
   {

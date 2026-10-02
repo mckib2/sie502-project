@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Q7: Sequential world-state prediction: successor of OPM_i should be input of OPM_i+1
+
 SELECT ?opm1 ?opm2 ?successor ?input ?ok
 WHERE {
   ?opm1 a cams:OPM ;

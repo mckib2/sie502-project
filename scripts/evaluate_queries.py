@@ -18,6 +18,7 @@ except ImportError:  # pragma: no cover
 ROOT = Path(__file__).resolve().parents[1]
 OWL_DIR = ROOT / "build" / "owl"
 QUERIES = ROOT / "queries"
+SPARQL_DIR = ROOT / "src/method/sparql"
 CAMS = Namespace("https://example.com/cams/vocabulary#")
 DESC = Namespace("https://example.com/cams/denied/project/description#")
 DENIED = Namespace("https://example.com/cams/denied/vocabulary#")
@@ -507,13 +508,24 @@ def check_commander_notices(g: Graph) -> None:
 
 
 def main() -> int:
-    g = load_graph()
-    print(f"Loaded graph: {len(g)} triples")
+    # Verify query synchronization across Markdown, .sparql, and .rq
+    sync_q = ROOT / "scripts" / "sync_queries.py"
+    if sync_q.exists():
+        import runpy
+        mod = runpy.run_path(str(sync_q))
+        if "check_sync" in mod:
+            ret = mod["check_sync"]()
+            if ret != 0:
+                print("  SPARQL query synchronization check failed!")
+                return 1
 
-    for rq in sorted(QUERIES.glob("q*.rq")):
-        print(f"\n=== {rq.name} ===")
+    g = load_graph()
+    print(f"\nLoaded graph: {len(g)} triples")
+
+    for sp in sorted(SPARQL_DIR.glob("q*.sparql")):
+        print(f"\n=== {sp.name} ===")
         try:
-            rows = run_sparql(g, rq)
+            rows = run_sparql(g, sp)
         except Exception as exc:  # noqa: BLE001
             print(f"  QUERY ERROR: {exc}")
             continue

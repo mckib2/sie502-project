@@ -4,7 +4,7 @@ ontology: https://example.com/cams/denied/project/description
 
 # CAMS Analysis Dashboard
 
-Analysis layer over the denied scenario.
+Methodology analysis layer evaluating collaborative autonomy models against core competence questions.
 
 ---
 
@@ -12,12 +12,13 @@ Analysis layer over the denied scenario.
 
 ### Q1. Does a set of ordered behaviors satisfy an Intent?
 
-Active Intents --> Active Objectives --> assigned-team Engagement OPMs/Roles (with `precedes` sequence).
+Active commander intents, spawned objectives, and assigned-team engagement OPMs/Roles in execution sequence.
 
 #### Evidence
 
 ```table
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
 
 SELECT ?intent ?objective ?opm ?role ?asset ?team ?nextObjective ?nextOpm
        (COUNT(DISTINCT ?predOpm) AS ?seq)
@@ -45,7 +46,7 @@ ORDER BY ?seq ?intent ?role
 
 #### Interpretation
 
-Rows show Alpha's Active Search / Strike / BDA chain with Roles filled.  Candidate OPMs (wide search, radar, strike solo) also appear when they satisfy Active Objectives on EngagementAlpha.  These are alternate plays.
+Rows reflect active intent-to-objective decomposition and the chronological sequence of OPMs with their allocated platform assets.  Columns identify team assignments, next-objective transitions, and sequential predecessors along the plan.  Candidate OPMs that satisfy active objectives appear alongside the primary execution sequence as alternate branch plays.
 
 ---
 
@@ -62,6 +63,7 @@ stylesheet:
       font-weight: bold
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
 
 SELECT ?mission ?team ?objective ?status ?opm ?role ?asset ?capability
 WHERE {
@@ -105,7 +107,7 @@ ORDER BY ?team ?objective ?status
 
 #### Interpretation
 
-TeamAlpha covers Active Search/Strike/BDA. TeamBravo shows missing coverage for Strike and BDA -- diagnosed gap in team composition / process (Bravo is recon-only), not a vocabulary deficiency.
+Rows with status `covered` indicate objectives where the executing team's allocated assets provide all capabilities required by the OPM behaviors.  Rows flagged with `missing coverage` identify capability deficits where an assigned team composition cannot realize commander intent -- diagnosing a team composition or assignment gap in the mission plan rather than an ontology flaw.
 
 ---
 
@@ -122,6 +124,7 @@ stylesheet:
       font-weight: bold
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
 
 SELECT ?behavior ?problem
 WHERE {
@@ -162,7 +165,7 @@ ORDER BY ?behavior ?problem
 
 #### Interpretation
 
-Behaviors on allocated Roles should have capability + Intent path. Behavior data ICDs contracts are not currently concerns of this CAMS model.
+Identifies orphaned or disconnected behavior definitions.  Empty results confirm full end-to-end traceability from asset capabilities through behaviors to commander intents.  Flagged rows highlight behaviors lacking required capabilities, unassigned behaviors, or behaviors with no path to an active intent.  Data interface message contracts (ICDs) are outside the model scope.
 
 ---
 
@@ -174,6 +177,7 @@ Behaviors on allocated Roles should have capability + Intent path. Behavior data
 PREFIX cams: <https://example.com/cams/vocabulary#>
 PREFIX denied: <https://example.com/cams/denied/vocabulary#>
 PREFIX oml: <http://opencaesar.io/oml#>
+
 
 SELECT ?opm ?role ?behavior ?need ?resource ?asset ?access ?standoffM ?maxGsdM ?pixels ?fovDeg
 WHERE {
@@ -221,7 +225,7 @@ ORDER BY ?opm ?role ?need ?resource
 
 #### Interpretation
 
-Allocated Roles resolve specific resources or type tokens (`owns` / `shares`). Access `none` would be a feasibility gap. Imaging GSD / jam RF math are scripted in `evaluate_queries.py`.
+Verifies resource accessibility for allocated roles.  Each role resolves its resource requirements through asset ownership (`owns`) or peer sharing (`shares`).  An access status of `none` flags an unfulfilled requirement and indicates a plan feasibility gap.  Continuous physics calculations (such as sensor resolution or RF link budgets) are evaluated via external scripts.
 
 ---
 
@@ -238,6 +242,7 @@ stylesheet:
       font-weight: bold
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
 
 SELECT ?resource ?opm1 ?role1 ?asset1 ?opm2 ?role2 ?asset2 ?availability
 WHERE {
@@ -260,7 +265,7 @@ ORDER BY ?resource ?role1 ?role2
 
 #### Interpretation
 
-Empty under nominal execution (only `OPM_Search` executing).  Resource reservation via `isOccupiedBy` + `Busy` status (SWRL `ResourceOccupied*` rules) guards against double-allocation.  Runtime time-slot scheduling and priority preemption are outside the model -- that is a platform-runtime concern.
+Identifies concurrent resource contention where distinct executing roles demand the same physical resource.  An empty result confirms that active execution is free of contention.  The methodology models resource occupancy (marking resources Busy during execution), while dynamic time-slot scheduling and real-time preemption are platform runtime concerns outside the model.
 
 ---
 
@@ -277,6 +282,7 @@ stylesheet:
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
 PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
+
 
 SELECT ?assessment ?composed ?response ?opm ?estimate ?prob ?objective ?threshold
 WHERE {
@@ -299,7 +305,7 @@ ORDER BY ?assessment ?opm
 
 #### Interpretation
 
-`AssessmentAlphaFeasible` (baseline PoS ~0.757) meets all thresholds and triggers `ReplanAfterSpawn`.  `AssessmentInfeasible` detects Bravo's missing strike capability and triggers `NoticeMissionImpossible`, addressed to `Commander1` via SWRL `KickbackAddressing`.  Non-linear PoS arithmetic (parallel-then-serial composition) requires the scripted computation below; the vocabulary provides the inputs (estimates, thresholds) but not the formula.
+Displays mission assessments, aggregated success probability estimates, and triggered automated responses.  Assessments whose composed probabilities satisfy objective thresholds trigger proactive replanning actions to adapt to newly spawned goals.  Assessments detecting threshold violations generate operational alerts (such as commander notices) addressed via reasoner rules.  Non-linear probability arithmetic is evaluated in the computed analysis layer below.
 
 ---
 
@@ -317,6 +323,7 @@ stylesheet:
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
+
 SELECT ?opm1 ?opm2 ?successor ?input ?ok
 WHERE {
   ?opm1 a cams:OPM ;
@@ -331,7 +338,7 @@ ORDER BY ?successor
 
 #### Interpretation
 
-`OPM_Search` predicts `WS1`; `OPM_JamAndStrike` starts from `WS1` (chain-ok).  `OPM_JamAndStrike` predicts `WS2`; `OPM_BDA` starts from `WS2` (chain-ok).  The SWRL `StateChain` rule can derive `startsFrom` when not asserted.  Continuous physical state estimation (Kalman filters, etc.) is outside the model.
+Validates topological world-state continuity across chained plays.  A status of `chain-ok` confirms that the predicted successor state of a preceding OPM matches the starting state of the succeeding OPM.  SWRL rules can infer state continuity when omitted from assertions.  Continuous physical state estimation and sensor filtering remain outside the model.
 
 ---
 
@@ -351,6 +358,7 @@ stylesheet:
       color: "#c0392b"
 ---
 PREFIX cams: <https://example.com/cams/vocabulary#>
+
 
 SELECT ?owner ?ownerType ?constraint ?cStatus ?condition ?condStatus ?activation ?spawned
 WHERE {
@@ -377,13 +385,13 @@ ORDER BY ?ownerType ?owner ?condition
 
 #### Interpretation
 
-Active spawn demonstrated: `IntentFindFix` constraint satisfied → spawns `ObjSearch`, `ObjBDA`.  `IntentNeutralize` both conditions (`CondThreatPresent`, `CondThreatNear`) satisfied → spawns `ObjStrike`.  Inactive gate: `ObjInactiveLoiter` has `ObjLoiterConstraint` = Unsatisfied because `CondLoiterWeather` = Unsatisfied (one unsatisfied condition makes the conjunction fail).  SWRL rules `ConstraintUnsatisfied`, `ObjectiveActive`, `ObjectiveInactive` derive these statuses.  Temporal gate expiry (e.g., conditions becoming stale) is a process/runtime concern not modeled.
+Evaluates constraint conjunctions governing the activation of commander intents and mission objectives.  An intent or objective activates when all conjunct conditions are satisfied; any unsatisfied condition causes the constraint to fail, holding the element in an inactive state.  SWRL rules derive activation statuses automatically from condition satisfaction.  Temporal gate expiry and condition freshness monitoring are handled as operational processes.
 
 ---
 
 ## 2. Computed analysis -- PoS composition
 
-Scripted parallel-then-serial Probability of Success over EngagementAlpha Active objectives (`pos_inputs.sparql` via adapter).
+Scripted parallel-then-serial Probability of Success evaluated across active engagement plans (`pos_inputs.sparql` via adapter).
 
 ```python
 include('src/method/py/oml_adapter.py')
@@ -392,26 +400,11 @@ adapter = OmlQueryAdapter(query_executor=query, sparql_dir='src/method/sparql')
 result = await adapter.execute('pos_inputs')
 rows = result.get('rows', [])
 
-by_obj = {}
-thresholds = {}
+# Group by engagement plan
+by_ep = {}
 for r in rows:
-    obj = str(r.get('objective', '')).split('#')[-1]
-    opm = str(r.get('opm', '')).split('#')[-1]
-    p = float(r.get('prob', 0))
-    thr = float(r.get('threshold', 0))
-    by_obj.setdefault(obj, []).append((opm, p))
-    thresholds[obj] = thr
-
-composed = {}
-for obj, pairs in by_obj.items():
-    fail = 1.0
-    for _opm, p in pairs:
-        fail *= (1.0 - p)
-    composed[obj] = 1.0 - fail
-
-mission_p = 1.0
-for p in composed.values():
-    mission_p *= p
+    ep = str(r.get('ep', '')).split('#')[-1] or "Plan"
+    by_ep.setdefault(ep, []).append(r)
 
 def card(title, value, sub, color):
     return f'''<div style="background:#fdfefe;border:1px solid #e1e8ed;border-left:5px solid {color};border-radius:6px;padding:14px 20px;flex:1;min-width:160px;">
@@ -420,17 +413,55 @@ def card(title, value, sub, color):
       <div style="font-size:12px;color:#95a5a6;margin-top:2px;">{sub}</div>
     </div>'''
 
-obj_cards = "".join(
-    card(obj, f"{composed[obj]:.3f}", f"threshold {thresholds[obj]:.2f} · {'MET' if composed[obj] >= thresholds[obj] else 'UNMET'}",
-         "#27ae60" if composed[obj] >= thresholds[obj] else "#e74c3c")
-    for obj in composed
-)
-mission_color = "#27ae60" if mission_p >= 0.7 else "#f39c12"
-display(f'''<div style="display:flex;gap:16px;margin:16px 0;flex-wrap:wrap;">
-{obj_cards}
-{card("Mission serial PoS", f"{mission_p:.3f}", "product of per-objective parallel PoS", mission_color)}
-</div>
-<p style="color:#7f8c8d;font-size:13px;">Parallel within objective: 1−∏(1−p). Serial across Active objectives on EngagementAlpha. Candidate OPMs with estimates are included when they satisfy those objectives.</p>''')
+html_blocks = []
+for ep, ep_rows in by_ep.items():
+    thresholds = {}
+    baseline_by_obj = {}
+    all_by_obj = {}
+    for r in ep_rows:
+        obj = str(r.get('objective', '')).split('#')[-1]
+        p = float(r.get('prob', 0))
+        thr = float(r.get('threshold', 0))
+        is_base = bool(r.get('isBaseline', False))
+        thresholds[obj] = thr
+        all_by_obj.setdefault(obj, []).append(p)
+        if is_base:
+            baseline_by_obj.setdefault(obj, []).append(p)
+
+    def compose_pos(by_o):
+        c = {}
+        for o, probs in by_o.items():
+            fail = 1.0
+            for p in probs:
+                fail *= (1.0 - p)
+            c[o] = 1.0 - fail
+        prod = 1.0
+        for p in c.values():
+            prod *= p
+        return c, prod
+
+    base_c, base_prod = compose_pos(baseline_by_obj)
+    all_c, all_prod = compose_pos(all_by_obj)
+
+    obj_cards = "".join(
+        card(obj, f"{all_c[obj]:.3f}", f"threshold {thresholds[obj]:.2f} · {'MET' if all_c[obj] >= thresholds[obj] else 'UNMET'}",
+             "#27ae60" if all_c[obj] >= thresholds[obj] else "#e74c3c")
+        for obj in all_c
+    )
+    base_color = "#27ae60" if base_prod >= 0.7 else "#f39c12"
+    all_color = "#27ae60" if all_prod >= 0.7 else "#f39c12"
+
+    html_blocks.append(f'''<div style="margin-bottom:20px;">
+      <h4 style="margin:8px 0;color:#2c3e50;">Engagement: {ep}</h4>
+      <div style="display:flex;gap:16px;margin:12px 0;flex-wrap:wrap;">
+        {obj_cards}
+        {card("Baseline serial PoS", f"{base_prod:.3f}", "committed precedes chain", base_color) if base_c else ""}
+        {card("Ensemble serial PoS", f"{all_prod:.3f}", "all candidate plays included", all_color)}
+      </div>
+    </div>''')
+
+display("".join(html_blocks) +
+    '<p style="color:#7f8c8d;font-size:13px;">Parallel within objective: 1−∏(1−p). Serial across active objectives per engagement plan. Baseline evaluates committed precedes-chain plays; ensemble includes alternate candidate plays.</p>')
 ```
 
 ---

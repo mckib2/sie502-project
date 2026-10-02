@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Q3: Behavior gaps: Role realization and allocation.
+
 SELECT ?behavior ?problem
 WHERE {
   ?behavior a cams:Behavior .
