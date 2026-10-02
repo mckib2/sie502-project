@@ -125,6 +125,9 @@ WHERE {
 ORDER BY ?kind ?element
 ```
 
+> [!NOTE]
+> For this project submission, we expect this to be nonempty to show an example of one of these orphan-style queries working as intended!
+
 ### Platform
 
 ```table
