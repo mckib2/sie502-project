@@ -2,6 +2,7 @@ PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Q8: Constraint/Condition gating: conjunction roll-up, spawn, activation
 
+
 SELECT ?owner ?ownerType ?constraint ?cStatus ?condition ?condStatus ?activation ?spawned
 WHERE {
   {

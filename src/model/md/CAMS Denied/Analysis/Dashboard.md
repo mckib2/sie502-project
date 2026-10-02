@@ -391,13 +391,26 @@ Evaluates constraint conjunctions governing the activation of commander intents 
 
 ## 2. Computed analysis -- PoS composition
 
-Scripted parallel-then-serial Probability of Success evaluated across active engagement plans (`pos_inputs.sparql` via adapter).
+Scripted parallel-then-serial Probability of Success evaluated across active engagement plans (`pos_inputs.sparql`).
 
 ```python
-include('src/method/py/oml_adapter.py')
+result = await query("""
+PREFIX cams: <https://example.com/cams/vocabulary#>
 
-adapter = OmlQueryAdapter(query_executor=query, sparql_dir='src/method/sparql')
-result = await adapter.execute('pos_inputs')
+SELECT ?ep ?opm ?objective ?prob ?threshold ?isBaseline
+WHERE {
+  ?ep a cams:EngagementPlan ;
+      cams:contains ?opm .
+  ?opm cams:usesEstimator ?est ;
+       cams:satisfies ?objective .
+  ?est cams:yields ?estimate .
+  ?estimate cams:estimatedSuccessProbability ?prob .
+  ?objective cams:activationStatus "Active" ;
+             cams:successProbabilityThreshold ?threshold .
+  BIND(EXISTS { ?opm cams:precedes ?_n } || EXISTS { ?_p cams:precedes ?opm } AS ?isBaseline)
+}
+ORDER BY ?ep ?objective ?opm
+""")
 rows = result.get('rows', [])
 
 # Group by engagement plan

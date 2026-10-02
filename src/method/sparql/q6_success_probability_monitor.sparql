@@ -3,6 +3,7 @@ PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>
 
 # Q6: Probability of Success estimates for OPMs satisfying active objectives; assessments and responses
 
+
 SELECT ?assessment ?composed ?response ?opm ?estimate ?prob ?objective ?threshold
 WHERE {
   ?assessment a cams:MissionAssessment ;

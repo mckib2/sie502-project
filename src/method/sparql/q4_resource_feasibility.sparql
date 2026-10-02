@@ -4,6 +4,7 @@ PREFIX oml: <http://opencaesar.io/oml#>
 
 # Q4: Required resources (specific individual or type token) accessible via Role allocation.
 
+
 SELECT ?opm ?role ?behavior ?need ?resource ?asset ?access ?standoffM ?maxGsdM ?pixels ?fovDeg
 WHERE {
   ?opm a cams:OPM ;

@@ -40,8 +40,21 @@ def make_pattern(prefix: str, fence_type: str = "table") -> re.Pattern:
     )
 
 
+def make_python_query_pattern(prefix: str) -> re.Pattern:
+    return re.compile(
+        rf"({re.escape(prefix)}.*?```python\n(?:.*?await query\(\"\"\"\n)?)(.*?)(\"\"\"\)\n.*?```)",
+        re.S,
+    )
+
+
 QUERY_MAPPINGS: list[QueryMapping] = [
     # Dashboard Q1-Q8
+    QueryMapping(
+        name="PoS-Inputs",
+        md_file=DASHBOARD_MD,
+        md_regex=make_python_query_pattern("## 2. Computed analysis -- PoS composition"),
+        sparql_file=SPARQL_DIR / "pos_inputs.sparql",
+    ),
     QueryMapping(
         name="Q1",
         md_file=DASHBOARD_MD,
@@ -257,7 +270,7 @@ def sync_to_md() -> int:
             # In markdown fences, strip leading descriptive comments if preferred
             fence_lines = [
                 line for line in sp_text.splitlines()
-                if not (line.strip().startswith("#") and ("Q" in line or "Runtime" in line or "Sequential" in line))
+                if not (line.strip().startswith("#") and ("Q" in line or "Runtime" in line or "Sequential" in line or "PoS" in line))
             ]
             clean_query = "\n".join(fence_lines).strip()
 

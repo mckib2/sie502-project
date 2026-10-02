@@ -18,12 +18,14 @@ class OmlQueryAdapter:
         filename = name if name.endswith(".sparql") else f"{name}.sparql"
         path = self.sparql_dir / filename
         if not path.is_file():
-            # We might also try relative to this file location -- that's reasonable
-            alt_path = Path(__file__).parent.parent / "sparql" / filename
-            if alt_path.is_file():
+            file_loc = globals().get("__file__")
+            alt_path = Path(file_loc).parent.parent / "sparql" / filename if file_loc else None
+            if alt_path and alt_path.is_file():
                 path = alt_path
             else:
-                raise FileNotFoundError(f"SPARQL query file not found: {path} (or {alt_path})")
+                raise FileNotFoundError(
+                    f"SPARQL query file not found: {path}" + (f" (or {alt_path})" if alt_path else "")
+                )
         return path.read_text(encoding="utf-8").strip()
 
     async def execute(self, query_name: str, **kwargs):

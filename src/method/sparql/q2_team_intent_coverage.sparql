@@ -2,6 +2,7 @@ PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Q2: Team sufficiency: Role/capability coverage for assigned team; gaps for any engagement team.
 
+
 SELECT ?mission ?team ?objective ?status ?opm ?role ?asset ?capability
 WHERE {
   {

@@ -2,6 +2,7 @@ PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # Q5: Runtime resource contention: two distinct Roles (inter- or intra-OPM) whose allocated assets are executing and need the same resource.
 
+
 SELECT ?resource ?opm1 ?role1 ?asset1 ?opm2 ?role2 ?asset2 ?availability
 WHERE {
   ?asset1 cams:isExecuting ?opm1 .

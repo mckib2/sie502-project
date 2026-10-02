@@ -1,6 +1,7 @@
 PREFIX cams: <https://example.com/cams/vocabulary#>
 
 # PoS inputs: estimates on OPMs satisfying Active objectives across all engagements
+
 SELECT ?ep ?opm ?objective ?prob ?threshold ?isBaseline
 WHERE {
   ?ep a cams:EngagementPlan ;
@@ -14,4 +15,3 @@ WHERE {
   BIND(EXISTS { ?opm cams:precedes ?_n } || EXISTS { ?_p cams:precedes ?opm } AS ?isBaseline)
 }
 ORDER BY ?ep ?objective ?opm
-
