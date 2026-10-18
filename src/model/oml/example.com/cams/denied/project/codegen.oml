@@ -8,6 +8,6 @@ description <https://example.com/cams/denied/project/codegen#> as configs {
         codegen:context "https://example.com/cams/denied/project/bundle"
         codegen:binding [ codegen:key "path" codegen:value "build/docs" ]
         codegen:binding [ codegen:key "version" codegen:value "0.1.1" ]
-        codegen:binding [ codegen:key "commit" codegen:value "de2f76d" ]
+        codegen:binding [ codegen:key "commit" codegen:value "897fecd" ]
     ]
 }
