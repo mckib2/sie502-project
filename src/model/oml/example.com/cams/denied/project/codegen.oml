@@ -7,7 +7,7 @@ description <https://example.com/cams/denied/project/codegen#> as configs {
         codegen:spec playbook:PlaybookSpec
         codegen:context "https://example.com/cams/denied/project/bundle"
         codegen:binding [ codegen:key "path" codegen:value "build/docs" ]
-        codegen:binding [ codegen:key "version" codegen:value "0.1.1" ]
+        codegen:binding [ codegen:key "version" codegen:value "1.0.0" ]
         codegen:binding [ codegen:key "commit" codegen:value "897fecd" ]
     ]
 }

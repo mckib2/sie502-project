@@ -5,7 +5,7 @@ oml-code:
 # project npm settings
 project:
   name: "@oml/cams"
-  version: 0.1.1
+  version: 1.0.0
   title: CAMS
   description: Ontologies related to Collaborative Autonomy Management Systems.
 
@@ -22,6 +22,7 @@ pack:
 
 # Default CLI arguments per command
 defaults:
+  render: -m src/model/md -b build/web -c src/model/oml/example.com/cams/denied/project/bundle.oml
   export: -o build/owl
   reason: -o build/owl -t
   pack: -o build/dist
