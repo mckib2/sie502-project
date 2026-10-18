@@ -5,7 +5,7 @@ oml-code:
 # project npm settings
 project:
   name: "@oml/cams"
-  version: 0.1.0
+  version: 0.1.1
   title: CAMS
   description: Ontologies related to Collaborative Autonomy Management Systems.
 
