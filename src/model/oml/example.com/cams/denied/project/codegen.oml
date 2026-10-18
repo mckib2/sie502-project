@@ -1,0 +1,11 @@
+description <https://example.com/cams/denied/project/codegen#> as configs {
+
+    uses <http://opencaesar.io/codegen#> as codegen
+    extends <https://example.com/cams/codegen/playbook#> as playbook
+
+    instance playbookConfig : codegen:Config [
+        codegen:spec playbook:PlaybookSpec
+        codegen:context "https://example.com/cams/denied/project/bundle"
+        codegen:binding [ codegen:key "path" codegen:value "build/docs" ]
+    ]
+}

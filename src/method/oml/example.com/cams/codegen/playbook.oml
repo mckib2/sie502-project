@@ -1,0 +1,145 @@
+description <https://example.com/cams/codegen/playbook#> as playbook {
+
+    uses <http://opencaesar.io/codegen#> as codegen
+
+    instance PlaybookSpec : codegen:Spec [
+        codegen:construct """
+            PREFIX oml: <http://opencaesar.io/oml#>
+            PREFIX codegen: <http://opencaesar.io/codegen#>
+            PREFIX cams: <https://example.com/cams/vocabulary#>
+            PREFIX playbook: <https://example.com/cams/codegen/playbook#>
+
+            CONSTRUCT {
+                ?file a codegen:File ;
+                    codegen:path ?path ;
+                    codegen:template playbook:PlaybookTemplate ;
+                    codegen:root ?plan .
+
+                ?plan a playbook:EngagementPlan ;
+                    playbook:name ?planName ;
+                    playbook:team ?teamName ;
+                    playbook:mission ?missionName ;
+                    playbook:hasOPM ?opm .
+
+                ?opm a playbook:OPM ;
+                    playbook:name ?opmName ;
+                    playbook:objective ?objName ;
+                    playbook:threshold ?threshold ;
+                    playbook:successor ?succName ;
+                    playbook:estimate ?prob ;
+                    playbook:hasRole ?role .
+
+                ?role a playbook:Role ;
+                    playbook:name ?roleName ;
+                    playbook:behavior ?behName ;
+                    playbook:asset ?assetName ;
+                    playbook:capability ?capName .
+            }
+            WHERE {
+                ?plan a cams:EngagementPlan .
+                BIND(REPLACE(STR(?plan), "^.*[/#]", "") AS ?planId)
+                BIND(IRI(CONCAT("urn:file:playbook:", ?planId)) AS ?file)
+                BIND(CONCAT("${path}/", ?planId, "-playbook.md") AS ?path)
+
+                OPTIONAL { ?plan cams:name ?pName }
+                BIND(COALESCE(?pName, ?planId) AS ?planName)
+
+                OPTIONAL {
+                    ?plan cams:isExecutedBy ?team .
+                    OPTIONAL { ?team cams:name ?tName }
+                    BIND(COALESCE(?tName, REPLACE(STR(?team), "^.*[/#]", "")) AS ?teamName)
+                }
+
+                OPTIONAL {
+                    ?plan cams:realizes ?mission .
+                    OPTIONAL { ?mission cams:name ?mName }
+                    BIND(COALESCE(?mName, REPLACE(STR(?mission), "^.*[/#]", "")) AS ?missionName)
+                }
+
+                ?plan cams:contains ?opm .
+                ?opm a cams:OPM .
+                OPTIONAL { ?opm cams:name ?oName }
+                BIND(COALESCE(?oName, REPLACE(STR(?opm), "^.*[/#]", "")) AS ?opmName)
+
+                OPTIONAL {
+                    ?opm cams:satisfies ?obj .
+                    OPTIONAL { ?obj cams:name ?obName }
+                    BIND(COALESCE(?obName, REPLACE(STR(?obj), "^.*[/#]", "")) AS ?objName)
+                    OPTIONAL { ?obj cams:successProbabilityThreshold ?th }
+                    BIND(STR(?th) AS ?threshold)
+                }
+
+                OPTIONAL {
+                    ?opm cams:predictsSuccessor ?ws .
+                    OPTIONAL { ?ws cams:name ?wsName }
+                    BIND(COALESCE(?wsName, REPLACE(STR(?ws), "^.*[/#]", "")) AS ?succName)
+                }
+
+                OPTIONAL {
+                    ?opm cams:usesEstimator ?est .
+                    ?est cams:yields ?estRes .
+                    ?estRes cams:estimatedSuccessProbability ?estProb .
+                    BIND(STR(?estProb) AS ?prob)
+                }
+
+                OPTIONAL {
+                    ?opm cams:contains ?role .
+                    ?role a cams:Role .
+
+                    OPTIONAL { ?role cams:name ?rName }
+                    BIND(COALESCE(?rName, REPLACE(STR(?role), "^.*[/#]", "")) AS ?roleName)
+
+                    OPTIONAL {
+                        ?role cams:realizesBehavior ?beh .
+                        OPTIONAL { ?beh cams:name ?bName }
+                        BIND(COALESCE(?bName, REPLACE(STR(?beh), "^.*[/#]", "")) AS ?behName)
+
+                        OPTIONAL {
+                            ?beh cams:requiresCapability ?cap .
+                            OPTIONAL { ?cap cams:name ?cName }
+                            BIND(COALESCE(?cName, REPLACE(STR(?cap), "^.*[/#]", "")) AS ?capName)
+                        }
+                    }
+
+                    OPTIONAL {
+                        ?role cams:allocatedTo ?asset .
+                        OPTIONAL { ?asset cams:name ?aName }
+                        BIND(COALESCE(?aName, REPLACE(STR(?asset), "^.*[/#]", "")) AS ?assetName)
+                    }
+                }
+            }
+        """
+        codegen:parameter "path"
+    ]
+
+    instance PlaybookTemplate : codegen:Template [
+        codegen:body """
+            {%- set plan = object(file, "codegen:root") -%}
+            # Autonomous Mission Playbook: {{ object(plan, "playbook:name") }}
+
+            **Executing Team:** {{ object(plan, "playbook:team") or "Unassigned" }}  
+            **Realized Mission:** {{ object(plan, "playbook:mission") or "General Operations" }}  
+
+            ---
+
+            ## 1. Operational Execution Plan (OPM Breakdown)
+
+            {% for opm in objects(plan, "playbook:hasOPM") %}
+            ### Phase: {{ object(opm, "playbook:name") }}
+            - **Satisfies Objective:** {{ object(opm, "playbook:objective") or "None" }}{% if object(opm, "playbook:threshold") %} (PoS Threshold: {{ object(opm, "playbook:threshold") }}){% endif %}
+            - **Successor World State:** {{ object(opm, "playbook:successor") or "Nominal" }}
+            {% if object(opm, "playbook:estimate") %}- **Estimated Success Probability:** {{ object(opm, "playbook:estimate") }}{% endif %}
+
+            #### Role Allocation & Tasking
+            | Role Slot | Realized Behavior | Allocated Asset | Required Capability |
+            | :--- | :--- | :--- | :--- |
+            {%- for role in objects(opm, "playbook:hasRole") %}
+            | {{ object(role, "playbook:name") }} | {{ object(role, "playbook:behavior") or "Unassigned" }} | {{ object(role, "playbook:asset") or "Unallocated" }} | {{ object(role, "playbook:capability") or "Standard" }} |
+            {%- endfor %}
+
+            {% endfor %}
+            ---
+            *Generated by CAMS Autonomous Methodology Generator*
+        """
+    ]
+}

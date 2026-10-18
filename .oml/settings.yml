@@ -13,15 +13,15 @@ project:
 sources:
   - src
 
-# oml server settings
-# By default the server binds a free port chosen by the OS (the actual port is
-# reported by 'oml list'), so multiple workspaces never collide. Uncomment to
-# pin a fixed port instead — but make sure no other workspace uses the same one.
-# server:
-#   port: 8080
+# packing settings
+pack:
+  - include: [src/method]
+    exclude:
+      - "**/__pycache__/**"
+      - "**/*.pyc"
 
-# Default CLI arguments per command, injected before your own (so you can override them on the
-# command line). Works for any oml command; key by command name. For example:
-# defaults:
-#   export: -o build/owl
-#   reason: -o build/owl -t
+# Default CLI arguments per command
+defaults:
+  export: -o build/owl
+  reason: -o build/owl -t
+  pack: -o build/dist
