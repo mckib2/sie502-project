@@ -1,5 +1,8 @@
 # CAMS
 
+[![Release](https://img.shields.io/github/v/release/mckib2/sie502-project)](https://github.com/mckib2/sie502-project/releases/latest)
+[![Live Site](https://img.shields.io/badge/Live-Site-brightgreen)](https://mckib2.github.io/sie502-project/)
+
 Collaborative Autonomy Management System (CAMS) ontologies in OML.
 CAMS manages commander intent, mission/engagement plans, multi-role OPMs, team assets, shared resources,
 world/situational awareness, and probability-of-success monitoring.  It is specifically the management system,
