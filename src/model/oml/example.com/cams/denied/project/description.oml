@@ -186,7 +186,7 @@ description <https://example.com/cams/denied/project/description#> as denied-des
         cams:name "Loiter on station"
     ]
 
-    instance RQ23_Recon : cams:Asset, cams:Capability [
+    instance RQ23_Recon : cams:Asset [
         cams:name "RQ-23 Recon-1"
         denied:assetKind "Recon"
         cams:isExecuting OPM_Search
