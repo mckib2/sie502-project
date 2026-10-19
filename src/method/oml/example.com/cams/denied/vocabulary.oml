@@ -13,7 +13,7 @@ vocabulary <https://example.com/cams/denied/vocabulary#> as denied {
 
     @dc:description "Primary role class of an Asset."
     scalar property assetKind [
-        domain cams:Asset0
+        domain cams:Asset
         range AssetKind
         functional
     ]

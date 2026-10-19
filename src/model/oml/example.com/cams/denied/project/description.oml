@@ -15,7 +15,7 @@ description <https://example.com/cams/denied/project/description#> as denied-des
     instance IntentFindFix : cams:Intent [
         cams:name "Find and fix hostile emitters"
         cams:priority "Medium"
-        cams:isGatedBy IntentFindFixConstraint
+        // cams:isGatedBy IntentFindFixConstraint
         cams:spawns ObjSearch
         cams:spawns ObjBDA
     ]
